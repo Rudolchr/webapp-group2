@@ -2,8 +2,7 @@
  * @fileOverview  Auxiliary data management procedures
  * @author Gerd Wagner
  */
-import Author from "../m/Author.mjs";
-import Publisher from "../m/Publisher.mjs";
+import Person from "../m/Person.mjs";
 import Movie from "../m/Movie.mjs";
 
 /*******************************************
@@ -14,11 +13,15 @@ import Movie from "../m/Movie.mjs";
  */
 function generateTestData() {
   try {
-    Author.instances["1"] = new Author({
-      authorId: 1,
-      name: "Daniel Dennett"
+    Person.instances["1"] = new Person({
+      personId: 1,
+      name: "Quentin Tarantino"
     });
-    Author.instances["2"] = new Author({
+    Person.instances["2"] = new Person({
+      personId: 2,
+      name: "Uma Thurman"
+    });
+ /*   Author.instances["2"] = new Author({
       authorId: 2,
       name: "Douglas Hofstadter"
     });
@@ -36,12 +39,23 @@ function generateTestData() {
       address: "New York, USA"
     });
     Publisher.saveAll();
+
+  */
+
+    Person.saveAll();
+
     Movie.instances["1"] = new Movie({
       movieId: 1,
-      title: "The Mind's I",
+      title: "Kill Bill",
       releaseDate: new Date("2000-1-2"),
-      authorIdRefs: [1,2],
-      publisher_id: "Bantam Movies"
+      actorsIdRefs: [1,2]
+    // publisher_id: "Bantam Movies"
+    });
+    Movie.instances["2"] = new Movie({
+      movieId: 2,
+      title: "Pulp Fiction",
+      releaseDate: new Date("2000-1-2")
+      // publisher_id: "Bantam Movies"
     });
     //Movie.instances["0553345842"] = new Movie({
     //  movieId: "0553345842",
@@ -80,10 +94,8 @@ function generateTestData() {
 function clearData() {
   if (confirm( "Do you really want to delete the entire database?")) {
     try {
-      Author.instances = {};
-      localStorage["authors"] = "{}";
-      Publisher.instances = {};
-      localStorage["publishers"] = "{}";
+      Person.instances = {};
+      localStorage["people"] = "{}";
       Movie.instances = {};
       localStorage["movies"] = "{}";
       console.log("All data cleared.");
