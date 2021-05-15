@@ -48,13 +48,15 @@ function generateTestData() {
       movieId: 1,
       title: "Kill Bill",
       releaseDate: new Date("2000-1-2"),
-      actorsIdRefs: [1,2]
+      actorsIdRefs: [1,2],
+      directorId : 1
     // publisher_id: "Bantam Movies"
     });
     Movie.instances["2"] = new Movie({
       movieId: 2,
       title: "Pulp Fiction",
-      releaseDate: new Date("2000-1-2")
+      releaseDate: new Date("2000-1-2"),
+      directorId : 2
       // publisher_id: "Bantam Movies"
     });
     //Movie.instances["0553345842"] = new Movie({
@@ -83,6 +85,7 @@ function generateTestData() {
     //  authorIdRefs: [2],
     //  publisher_id: "Basic Movies"
     //});
+    console.log(Movie.instances);
     Movie.saveAll();
   } catch (e) {
     console.log( `${e.constructor.name}: ${e.message}`);

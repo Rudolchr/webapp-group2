@@ -7,7 +7,8 @@
 import Person from "./Person.mjs";
 import {cloneObject, isIntegerOrIntegerString, isNonEmptyString} from "../../lib/util.mjs";
 import {NoConstraintViolation, MandatoryValueConstraintViolation,
-  RangeConstraintViolation, PatternConstraintViolation, UniquenessConstraintViolation, IntervalConstraintViolation}
+  RangeConstraintViolation, PatternConstraintViolation, UniquenessConstraintViolation,
+  IntervalConstraintViolation, ReferentialIntegrityConstraintViolation}
   from "../../lib/errorTypes.mjs";
 
 /**
@@ -16,11 +17,12 @@ import {NoConstraintViolation, MandatoryValueConstraintViolation,
  */
 class Movie {
   // using a record parameter with ES6 function parameter destructuring
-  constructor ({movieId, title, releaseDate, actors, actorsIdRefs}) {
+  constructor ({movieId, title, releaseDate, actors, actorsIdRefs, directorId}) {
                  //publisher, publisher_id}) {
     this.movieId = movieId;
     this.title = title;
     this.releaseDate = releaseDate;
+    this.directorId = directorId;
     // assign object references or ID references (to be converted in setter)
     if (actors || actorsIdRefs){
       this.actors = actors || actorsIdRefs;
@@ -28,6 +30,38 @@ class Movie {
   //  if (publisher || publisher_id) {
   //    this.publisher = publisher || publisher_id;
   //  }
+  }
+  get directorId(){
+    return this._directorId;
+  }
+  set directorId(d){
+    const validationResult = Movie.checkDirector(d);
+    if(validationResult instanceof NoConstraintViolation){
+      if(typeof(d) === "number"){
+        this._directorId = Person.instances[String(d)];
+      } else {
+        this._directorId = Person.instances[String(d.personId)];
+      }
+    } else{
+      throw validationResult;
+    }
+  }
+  static checkDirector(d){
+    if(!d){
+      return new MandatoryValueConstraintViolation("A Director must be provided!");
+    } else if(typeof(d) === "object"){
+      if(!Person.instances[String(d.personId)]){
+        return new ReferentialIntegrityConstraintViolation("There is no Person with ID " + id);
+      } else{
+        return new NoConstraintViolation();
+      }
+    } else if(typeof(d) === "number"){
+      if(!Person.instances[String(d)]){
+        return new ReferentialIntegrityConstraintViolation("There is no Person with ID " + id);
+      } else{
+        return new NoConstraintViolation();
+      }
+    }
   }
   get movieId() {
     return this._movieId;
@@ -366,11 +400,16 @@ Movie.retrieveAll = function () {
   for (let movieId of Object.keys( movies)) {
 
     try {
+      console.log("movie instance")
+      console.log(movies[movieId]);
       Movie.instances[movieId] = new Movie( movies[movieId]);
+      console.log(Movie.instances[movieId]);
     } catch (e) {
       console.log( `${e.constructor.name} while deserializing movie ${movieId}: ${e.message}`);
     }
   }
+  console.log("Loaded movies:");
+  console.log(Movie.instances);
 };
 
 /**

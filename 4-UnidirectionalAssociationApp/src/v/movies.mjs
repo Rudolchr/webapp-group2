@@ -38,11 +38,14 @@ window.addEventListener("beforeunload", Movie.saveAll);
  **********************************************/
 document.getElementById("retrieveAndListAll")
   .addEventListener("click", function () {
+    //console.log("hier");
+    //console.log(Movie.instances["1"]);
     document.getElementById("Movie-M").style.display = "none";
     document.getElementById("Movie-R").style.display = "block";
     const tableBodyEl = document.querySelector("section#Movie-R>table>tbody");
     tableBodyEl.innerHTML = "";  // drop old content
     for (const key of Object.keys( Movie.instances)) {
+      ///console.log(Movie.instances[key]);
       const movie = Movie.instances[key];
       const row = tableBodyEl.insertRow();
       row.insertCell().textContent = movie.movieId;
@@ -53,6 +56,9 @@ document.getElementById("retrieveAndListAll")
         const authListEl = createListFromMap(movie.actors, "name");
         row.insertCell().appendChild( authListEl);
       }
+      //console.log(movie);
+      const director = movie.directorId.name;
+      row.insertCell().textContent = director;
 //      // if the movie has a publisher, show its name
 //      row.insertCell().textContent =
 //        movie.publisher ? movie.publisher.name : "";
