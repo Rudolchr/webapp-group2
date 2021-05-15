@@ -17,7 +17,7 @@ import {NoConstraintViolation, MandatoryValueConstraintViolation,
  */
 class Movie {
   // using a record parameter with ES6 function parameter destructuring
-  constructor ({movieId, title, releaseDate, actors, actorsIdRefs, directorId}) {
+  constructor ({movieId, title, releaseDate, actors,directorId,actorsIdRefs}) {
                  //publisher, publisher_id}) {
     this.movieId = movieId;
     this.title = title;
@@ -30,38 +30,6 @@ class Movie {
   //  if (publisher || publisher_id) {
   //    this.publisher = publisher || publisher_id;
   //  }
-  }
-  get directorId(){
-    return this._directorId;
-  }
-  set directorId(d){
-    const validationResult = Movie.checkDirector(d);
-    if(validationResult instanceof NoConstraintViolation){
-      if(typeof(d) === "number"){
-        this._directorId = Person.instances[String(d)];
-      } else {
-        this._directorId = Person.instances[String(d.personId)];
-      }
-    } else{
-      throw validationResult;
-    }
-  }
-  static checkDirector(d){
-    if(!d){
-      return new MandatoryValueConstraintViolation("A Director must be provided!");
-    } else if(typeof(d) === "object"){
-      if(!Person.instances[String(d.personId)]){
-        return new ReferentialIntegrityConstraintViolation("There is no Person with ID " + id);
-      } else{
-        return new NoConstraintViolation();
-      }
-    } else if(typeof(d) === "number"){
-      if(!Person.instances[String(d)]){
-        return new ReferentialIntegrityConstraintViolation("There is no Person with ID " + id);
-      } else{
-        return new NoConstraintViolation();
-      }
-    }
   }
   get movieId() {
     return this._movieId;
@@ -178,34 +146,38 @@ class Movie {
 
     return new NoConstraintViolation();
   }
-  /*get publisher() {
-    return this._publisher;
+  get directorId(){
+    return this._directorId;
   }
-  static checkPublisher( publisher_id) {
-    let validationResult = null;
-    if (!publisher_id) {
-      validationResult = new NoConstraintViolation();  // optional
-    } else {
-      // invoke foreign key constraint check
-      validationResult = Publisher.checkNameAsIdRef( publisher_id);
-    }
-    return validationResult;
-  }
-  set publisher( p) {
-    if (!p) {  // unset publisher
-      delete this._publisher;
-    } else {
-      // p can be an ID reference or an object reference
-      const publisher_id = (typeof p !== "object") ? p : p.name;
-      const validationResult = Movie.checkPublisher( publisher_id);
-      if (validationResult instanceof NoConstraintViolation) {
-        // create the new publisher reference
-        this._publisher = Publisher.instances[ publisher_id];
+  set directorId(d){
+    const validationResult = Movie.checkDirector(d);
+    if(validationResult instanceof NoConstraintViolation){
+      if(typeof(d) === "number"){
+        this._directorId = Person.instances[String(d)];
       } else {
-        throw validationResult;
+        this._directorId = Person.instances[String(d.personId)];
+      }
+    } else{
+      throw validationResult;
+    }
+  }
+  static checkDirector(d){
+    if(!d){
+      return new MandatoryValueConstraintViolation("A Director must be provided!");
+    } else if(typeof(d) === "object"){
+      if(!Person.instances[String(d.personId)]){
+        return new ReferentialIntegrityConstraintViolation("There is no Person with ID " + id);
+      } else{
+        return new NoConstraintViolation();
+      }
+    } else if(typeof(d) === "number"){
+      if(!Person.instances[String(d)]){
+        return new ReferentialIntegrityConstraintViolation("There is no Person with ID " + id);
+      } else{
+        return new NoConstraintViolation();
       }
     }
-  }*/
+  }
   get actors() {
     return this._actors;
   }

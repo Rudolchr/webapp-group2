@@ -51,17 +51,13 @@ document.getElementById("retrieveAndListAll")
       row.insertCell().textContent = movie.movieId;
       row.insertCell().textContent = movie.title;
       row.insertCell().textContent = movie.releaseDate;
+      const director = movie.directorId.name;
+      row.insertCell().textContent = director;
       if (movie.actors) {
         // create list of actors for this movie if there are some
         const authListEl = createListFromMap(movie.actors, "name");
         row.insertCell().appendChild( authListEl);
       }
-      //console.log(movie);
-      const director = movie.directorId.name;
-      row.insertCell().textContent = director;
-//      // if the movie has a publisher, show its name
-//      row.insertCell().textContent =
-//        movie.publisher ? movie.publisher.name : "";
     }
   });
 
@@ -70,8 +66,8 @@ document.getElementById("retrieveAndListAll")
  **********************************************/
 const createFormEl = document.querySelector("section#Movie-C > form"),
       selectActorsEl = createFormEl.selectActors;
-//      selectPublisherEl = createFormEl.selectPublisher;
-document.getElementById("create").addEventListener("click", function () {
+//      selectDirectorEl = createFormEl.selectDirector;
+  document.getElementById("create").addEventListener("click", function () {
   document.getElementById("Movie-M").style.display = "none";
   document.getElementById("Movie-C").style.display = "block";
   // set up a single selection list for selecting a publisher
