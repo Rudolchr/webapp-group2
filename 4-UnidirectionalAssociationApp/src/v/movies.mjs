@@ -65,13 +65,13 @@ document.getElementById("retrieveAndListAll")
   Use case Create Movie
  **********************************************/
 const createFormEl = document.querySelector("section#Movie-C > form"),
-      selectActorsEl = createFormEl.selectActors;
-//      selectDirectorEl = createFormEl.selectDirector;
+      selectActorsEl = createFormEl.selectActors,
+      selectDirectorEl = createFormEl.selectDirector;
   document.getElementById("create").addEventListener("click", function () {
   document.getElementById("Movie-M").style.display = "none";
   document.getElementById("Movie-C").style.display = "block";
   // set up a single selection list for selecting a publisher
-//  fillSelectWithOptions( selectPublisherEl, Publisher.instances, "name");
+  fillSelectWithOptions( selectDirectorEl, Person.instances, "name");
   // set up a multiple selection list for selecting actors
   fillSelectWithOptions( selectActorsEl, Person.instances,
     "personId", {displayProp: "name"});
@@ -86,15 +86,18 @@ createFormEl.movieId.addEventListener("input", function () {
 /* SIMPLIFIED/MISSING CODE: add event listeners for responsive
    validation on user input with Movie.checkTitle and checkReleaseDate */
 
+
 // handle Save button click events
 createFormEl["commit"].addEventListener("click", function () {
   const slots = {
     movieId: createFormEl.movieId.value,
     title: createFormEl.title.value,
     releaseDate: createFormEl.releaseDate.value,
+    directorId: selectDirectorEl.value,
     actorsIdRefs: []
 //    publisher_id: createFormEl.selectPublisher.value
   };
+  console.log(slots);
   // check all input fields and show error messages
   createFormEl.movieId.setCustomValidity(
       Movie.checkMovieIdAsId( slots.movieId).message);
@@ -120,7 +123,7 @@ createFormEl["commit"].addEventListener("click", function () {
 **********************************************/
 const updateFormEl = document.querySelector("section#Movie-U > form"),
       selectUpdateMovieEl = updateFormEl.selectMovie;
-document.getElementById("update").addEventListener("click", function () {
+    document.getElementById("update").addEventListener("click", function () {
     document.getElementById("Movie-M").style.display = "none";
     document.getElementById("Movie-U").style.display = "block";
     // set up the movie selection list
@@ -136,7 +139,7 @@ selectUpdateMovieEl.addEventListener("change", function () {
   const formEl = document.querySelector("section#Movie-U > form"),
     saveButton = formEl.commit,
     selectActorsWidget = formEl.querySelector(".MultiChoiceWidget"),
-//    selectPublisherEl = formEl.selectPublisher,
+    selectDirectorEl = formEl.selectDirector,
     movieId = formEl.selectMovie.value;
   if (movieId) {
     const movie = Movie.instances[movieId];
@@ -144,12 +147,13 @@ selectUpdateMovieEl.addEventListener("change", function () {
     formEl.title.value = movie.title;
     formEl.releaseDate.value = movie.releaseDate;
     // set up the associated publisher selection list
-//    fillSelectWithOptions( selectPublisherEl, Publisher.instances, "name");
+    fillSelectWithOptions( selectDirectorEl, Person.instances, "name");
     // set up the associated actors selection widget
     createMultipleChoiceWidget( selectActorsWidget, movie.actors,
         Person.instances, "personId", "name", 1);  // minCard=1
     // assign associated publisher as the selected option to select element
 //    if (movie.publisher) formEl.selectPublisher.value = movie.publisher.name;
+    formEl.selectDirector.value = movie.directorId.name;
     saveButton.disabled = false;
   } else {
     formEl.reset();
@@ -168,8 +172,10 @@ updateFormEl["commit"].addEventListener("click", function () {
     movieId: updateFormEl.movieId.value,
     title: updateFormEl.title.value,
     releaseDate: updateFormEl.releaseDate.value,
-//    publisher_id: updateFormEl.selectPublisher.value
+    directorId: updateFormEl.selectDirector.value
   }
+
+  console.log(slots);
   // add event listeners for responsive validation
   /* MISSING CODE */
   // commit the update only if all form field values are valid

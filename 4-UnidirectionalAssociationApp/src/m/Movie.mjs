@@ -151,6 +151,7 @@ class Movie {
   }
   set directorId(d){
     const validationResult = Movie.checkDirector(d);
+    console.log(validationResult);
     if(validationResult instanceof NoConstraintViolation){
       if(typeof(d) === "number"){
         this._directorId = Person.instances[String(d)];
@@ -294,7 +295,7 @@ Movie.add = function (slots) {
  *  that the new values are validated
  */
 Movie.update = function ({movieId, title, releaseDate,
-    actorIdRefsToAdd, actorIdRefsToRemove,}){
+    actorIdRefsToAdd, actorIdRefsToRemove, directorId}){
   // publisher_id}) {
   const movie = Movie.instances[movieId],
       objectBeforeUpdate = cloneObject( movie);  // save the current state of movie
@@ -319,6 +320,17 @@ Movie.update = function ({movieId, title, releaseDate,
       for (let actor_id of actorIdRefsToRemove) {
         movie.removeActor( actor_id);
       }
+    }
+    if(movie.directorId && movie.directorId.name !== directorId) {
+      let dir = -1;
+      for(const id in Person.instances){
+        if(Person.instances[id].name === directorId){
+          dir = parseInt(id);
+        }
+      }
+
+      movie.directorId = dir;
+      updatedProperties.push("directorId");
     }
     // publisher_id may be the empty string for unsetting the optional property
    /* if (publisher_id && (!movie.publisher && publisher_id ||
