@@ -275,7 +275,16 @@ Movie.instances = {};
  */
 Movie.add = function (slots) {
   var movie = null;
+  let dir = -1;
+  for(const id in Person.instances){
+    if(Person.instances[id].name === slots.directorId){
+      dir = parseInt(id);
+    }
+  }
+  slots.directorId = dir;
+
   try {
+
     movie = new Movie( slots);
   } catch (e) {
     console.log( `${e.constructor.name}: ${e.message}`);
