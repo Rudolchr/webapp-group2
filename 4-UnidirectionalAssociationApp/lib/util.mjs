@@ -144,10 +144,6 @@ function createMultipleChoiceWidget(widgetContainerEl, selection, selectionRange
     if (e.target.tagName === "BUTTON") {  // delete/undo button
       listItemEl = e.target.parentNode;
       listEl = listItemEl.parentNode;
-      if (listEl.children.length <= minCard) {
-        alert("A movie must have at least one author!");
-        return;
-      }
       if (listItemEl.classList.contains("removed")) {
         // undoing a previous removal
         listItemEl.classList.remove("removed");

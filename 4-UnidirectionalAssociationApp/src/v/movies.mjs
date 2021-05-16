@@ -95,7 +95,6 @@ createFormEl["commit"].addEventListener("click", function () {
     releaseDate: createFormEl.releaseDate.value,
     directorId: selectDirectorEl.value,
     actorsIdRefs: []
-//    publisher_id: createFormEl.selectPublisher.value
   };
   console.log(slots);
   // check all input fields and show error messages
@@ -103,16 +102,12 @@ createFormEl["commit"].addEventListener("click", function () {
       Movie.checkMovieIdAsId( slots.movieId).message);
   /* SIMPLIFIED CODE: no before-submit validation of name */
   // get the list of selected actors
-  const selAuthOptions = createFormEl.selectActors.selectedOptions;
-  // check the mandatory value constraint for actors
-  createFormEl.selectActors.setCustomValidity(
-    selAuthOptions.length > 0 ? "" : "No actor selected!"
-  );
+  const selActOptions = createFormEl.selectActors.selectedOptions;
   // save the input data only if all form fields are valid
   if (createFormEl.checkValidity()) {
     // construct a list of actor ID references
-    for (const opt of selAuthOptions) {
-      slots.actorIdRefs.push( opt.value);
+    for (const opt of selActOptions) {
+      slots.actorsIdRefs.push( opt.value);
     }
     Movie.add( slots);
   }

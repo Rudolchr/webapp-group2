@@ -27,9 +27,6 @@ class Movie {
     if (actors || actorsIdRefs){
       this.actors = actors || actorsIdRefs;
     }
-  //  if (publisher || publisher_id) {
-  //    this.publisher = publisher || publisher_id;
-  //  }
   }
   get movieId() {
     return this._movieId;
