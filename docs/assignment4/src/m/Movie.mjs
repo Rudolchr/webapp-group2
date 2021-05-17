@@ -18,7 +18,6 @@ import {NoConstraintViolation, MandatoryValueConstraintViolation,
 class Movie {
   // using a record parameter with ES6 function parameter destructuring
   constructor ({movieId, title, releaseDate, actors,directorId,actorsIdRefs}) {
-                 //publisher, publisher_id}) {
     this.movieId = movieId;
     this.title = title;
     this.releaseDate = releaseDate;
@@ -26,6 +25,8 @@ class Movie {
     // assign object references or ID references (to be converted in setter)
     if (actors || actorsIdRefs){
       this.actors = actors || actorsIdRefs;
+    } else {
+      this.actors = [];
     }
   }
   get movieId() {
@@ -37,16 +38,6 @@ class Movie {
     } else{
       return new NoConstraintViolation();
     }
-    //if (!movieId) return new NoConstraintViolation();
-    //else if (typeof movieId !== "string" || movieId.trim() === "") {
-    //  return new RangeConstraintViolation(
-    //      "The MovieID must be a non-empty string!");
-    //} else if (!/\b\d{9}(\d|X)\b/.test( movieId)) {
-    //  return new PatternConstraintViolation("The MovieID must be "+
-    //      "a 10-digit string or a 9-digit string followed by 'X'!");
-    //} else {
-    //  return new NoConstraintViolation();
-    //}
   }
   static checkMovieIdAsId( movieId) {
     let validationResult = Movie.checkMovieId( movieId);
@@ -83,8 +74,6 @@ class Movie {
     } else{
       throw validationResult;
     }
-    //SIMPLIFIED CODE: no validation with Movie.checkTitle
-    //this._title = t;
   }
   static checkTitle(t){
     if(!t){
@@ -105,8 +94,6 @@ class Movie {
     } else{
       throw validationResult;
     }
-    //SIMPLIFIED CODE: no validation with Movie.checkReleaseDate
-    //this._releaseDate = parseInt( y);
   }
   static checkReleaseDate(date){
     if(!date){
@@ -114,7 +101,6 @@ class Movie {
     }
     let strDate = null;
     if(date instanceof Date){
-      console.log("is Date");
       strDate = date.getFullYear() + "-" +
         (date.getMonth() + 1) + "-" +
         date.getDate();
@@ -146,8 +132,6 @@ class Movie {
           return new RangeConstraintViolation("Expected format as YYYY-MM-DD");
       }
       ymd = [parseInt(tmp[0]), parseInt(tmp[1]), parseInt(tmp[2])];
-      //ymd = [parseInt(tmp[0]), parseInt(tmp[1]), parseInt(tmp[2])];
-      console.log(ymd);
       // Filter out dates < 1895-12-28
       if(ymd[0] < 1895){
         return new IntervalConstraintViolation("The release date must be greater then 1895-12-28");
@@ -157,7 +141,7 @@ class Movie {
         return new IntervalConstraintViolation("The release date must be greater then 1895-12-28");
       }
 
-      // Day range chack
+      // Day range check
       if(typeof(mon31day.find(m => m === ymd[1])) !== 'undefined'){
         if(ymd[2] > 31 || ymd[2] < 1){
           return new IntervalConstraintViolation("This Date does not exist");
@@ -182,27 +166,23 @@ class Movie {
        * https://klexikon.zum.de/wiki/Schaltjahr
        */
       let schalt = !(ymd[0] % 4) && ((ymd[0] % 100) || !(ymd[0] % 400));
+      //console.log("y: " + ymd[0] + ", m: " + ymd[1] + ", d: " + ymd[2] + ", sch: " + schalt);
 
-      console.log("y: " + ymd[0] + ", m: " + ymd[1] + ", d: " + ymd[2] + ", sch: " + schalt);
       // Range test for days
       if(ymd[2] < 1 || ymd[2] > 31){
-        console.log("118");
         return new IntervalConstraintViolation("A day must be given in the range 1 - 31");
 
       // Range test for months
       } else if(ymd[1] < 0 || ymd[1] > 12){
-        console.log("124");
         return new IntervalConstraintViolation("Months range from 1 to 12");
 
       // intercalary year specials for february
       } else if(schalt){
         if(ymd[1] == 2 && ymd[2] > 29){
-          console.log("130");
           return new IntervalConstraintViolation("February cannot have more then 29 days");
         }
       } else if(!schalt){
         if(ymd[1] == 2 && ymd[2] > 28){
-          console.log("135");
           return new IntervalConstraintViolation("Seems this is not an intercalary year");
         }
       }
@@ -217,7 +197,6 @@ class Movie {
   }
   set directorId(d){
     const validationResult = Movie.checkDirector(d);
-    console.log(validationResult);
     if(validationResult instanceof NoConstraintViolation){
       if(typeof(d) === "number"){
         this._directorId = Person.instances[String(d)];
@@ -296,14 +275,14 @@ class Movie {
   }
   // Serialize movie object
   toString() {
-    let movieStr = `Movie{ MovieID: ${this._movieId}, title: ${this._title}, releaseDate: ${this._releaseDate}`;
-    //if (this.publisher) movieStr += `, publisher: ${this.publisher.name}`;
+    let movieStr = `Movie{ MovieID: ${this._movieId}, title: ${this._title}, releaseDate: ${this._releaseDate}, 
+    director: ${this._directorId}`;
     if (this._actors) movieStr += `, actors: ${Object.keys( this._actors).join(",")} }`;
     return `${movieStr}`;
   }
   // Convert object to record with ID references
   toJSON() {  // is invoked by JSON.stringify
-    var rec = {};
+    let rec = {};
     for (const p of Object.keys( this)) {
       // copy only property slots with underscore prefix
       if (p.charAt(0) !== "_") continue;
@@ -344,16 +323,7 @@ Movie.instances = {};
  */
 Movie.add = function (slots) {
   var movie = null;
-  //let dir = -1;
-  //for(const id in Person.instances){
-  //  if(Person.instances[id].name === slots.directorId){
-  //    dir = parseInt(id);
-  //  }
-  //}
-  //slots.directorId = dir;
-
   try {
-
     movie = new Movie( slots);
   } catch (e) {
     console.log( `${e.constructor.name}: ${e.message}`);
@@ -371,7 +341,6 @@ Movie.add = function (slots) {
  */
 Movie.update = function ({movieId, title, releaseDate,
     actorIdRefsToAdd, actorIdRefsToRemove, directorId}){
-  // publisher_id}) {
   const movie = Movie.instances[movieId],
       objectBeforeUpdate = cloneObject( movie);  // save the current state of movie
   var noConstraintViolated = true, updatedProperties = [];
@@ -397,22 +366,9 @@ Movie.update = function ({movieId, title, releaseDate,
       }
     }
     if(movie.directorId && movie.directorId.name !== directorId) {
-      //let dir = -1;
-      //for(const id in Person.instances){
-      //  if(Person.instances[id].name === directorId){
-      //    dir = parseInt(id);
-      //  }
-      //}
-
       movie.directorId = directorId;
       updatedProperties.push("directorId");
     }
-    // publisher_id may be the empty string for unsetting the optional property
-   /* if (publisher_id && (!movie.publisher && publisher_id ||
-        movie.publisher && movie.publisher.name !== publisher_id)) {
-      movie.publisher = publisher_id;
-      updatedProperties.push("publisher");
-    }*/
   } catch (e) {
     console.log( `${e.constructor.name}: ${e.message}`);
     noConstraintViolated = false;
@@ -441,10 +397,8 @@ Movie.destroy = function (movieId) {
 };
 /**
  *  Load all movie table rows and convert them to objects
- *  Precondition: publishers and people must be loaded first
+ *  Precondition: people must be loaded first
  */
-
-
 Movie.retrieveAll = function () {
   var movies = {};
   try {
@@ -459,16 +413,11 @@ Movie.retrieveAll = function () {
   for (let movieId of Object.keys( movies)) {
 
     try {
-      console.log("movie instance")
-      console.log(movies[movieId]);
       Movie.instances[movieId] = new Movie( movies[movieId]);
-      console.log(Movie.instances[movieId]);
     } catch (e) {
       console.log( `${e.constructor.name} while deserializing movie ${movieId}: ${e.message}`);
     }
   }
-  console.log("Loaded movies:");
-  console.log(Movie.instances);
 };
 
 /**

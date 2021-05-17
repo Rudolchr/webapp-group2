@@ -160,15 +160,17 @@ Person.update = function ({personId, name}) {
  *  movies is required for being able to delete the person from the movies' actors/director.
  */
 
-//TO-DO: director case
 Person.destroy = function (personId) {
   const person = Person.instances[personId];
   // delete all dependent movie records
   for (const movieId of Object.keys( Movie.instances)) {
     const movie = Movie.instances[movieId];
+    //actors are optional, so only there are just not associated to movie anymore
     if (movie.actors) {
       if (movie.actors[personId]) delete movie.actors[personId];
     }
+    //director is mandatory, so if director is deleted, so are his movies
+    if (movie.directorId.personId === parseInt(personId)) Movie.destroy(movie.movieId);
   }
   // delete the person object
   delete Person.instances[personId];

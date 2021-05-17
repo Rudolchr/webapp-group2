@@ -38,19 +38,20 @@ window.addEventListener("beforeunload", Movie.saveAll);
  **********************************************/
 document.getElementById("retrieveAndListAll")
   .addEventListener("click", function () {
-    //console.log("hier");
-    //console.log(Movie.instances["1"]);
+
     document.getElementById("Movie-M").style.display = "none";
     document.getElementById("Movie-R").style.display = "block";
     const tableBodyEl = document.querySelector("section#Movie-R>table>tbody");
     tableBodyEl.innerHTML = "";  // drop old content
     for (const key of Object.keys( Movie.instances)) {
-      ///console.log(Movie.instances[key]);
       const movie = Movie.instances[key];
+      const date = new Date(movie.releaseDate);
+      let dateStr = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+
       const row = tableBodyEl.insertRow();
       row.insertCell().textContent = movie.movieId;
       row.insertCell().textContent = movie.title;
-      row.insertCell().textContent = movie.releaseDate;
+      row.insertCell().textContent = dateStr;
       const director = movie.directorId.name;
       row.insertCell().textContent = director;
       if (movie.actors) {
@@ -70,7 +71,7 @@ const createFormEl = document.querySelector("section#Movie-C > form"),
   document.getElementById("create").addEventListener("click", function () {
   document.getElementById("Movie-M").style.display = "none";
   document.getElementById("Movie-C").style.display = "block";
-  // set up a single selection list for selecting a publisher
+  // set up a single selection list for selecting a director
   fillSelectWithOptions( selectDirectorEl, Person.instances, "name");
   // set up a multiple selection list for selecting actors
   fillSelectWithOptions( selectActorsEl, Person.instances,
@@ -78,7 +79,6 @@ const createFormEl = document.querySelector("section#Movie-C > form"),
   createFormEl.reset();
 });
 // set up event handlers for responsive constraint validation
-console.log(createFormEl);
 createFormEl.movieId.addEventListener("input", function () {
   createFormEl.movieId.setCustomValidity(
       Movie.checkMovieIdAsId( createFormEl.movieId.value).message);
@@ -91,9 +91,6 @@ createFormEl.title.addEventListener("input", function () {
   createFormEl.title.setCustomValidity(
       Movie.checkTitle( createFormEl.title.value).message);
 });
-/* SIMPLIFIED/MISSING CODE: add event listeners for responsive
-   validation on user input with Movie.checkTitle and checkReleaseDate */
-
 
 // handle Save button click events
 createFormEl["commit"].addEventListener("click", function () {
@@ -110,7 +107,6 @@ createFormEl["commit"].addEventListener("click", function () {
     directorId: dir,
     actorsIdRefs: []
   };
-  console.log(slots);
   // check all input fields and show error messages
   createFormEl.movieId.setCustomValidity(
     Movie.checkMovieIdAsId( slots.movieId).message);
@@ -123,7 +119,6 @@ createFormEl["commit"].addEventListener("click", function () {
   selectDirectorEl.setCustomValidity(
     Movie.checkDirector(slots.directorId).message
   );
-  /* SIMPLIFIED CODE: no before-submit validation of name */
   // get the list of selected actors
   const selActOptions = createFormEl.selectActors.selectedOptions;
   // save the input data only if all form fields are valid
@@ -182,20 +177,21 @@ selectUpdateMovieEl.addEventListener("change", function () {
 
     formEl.movieId.value = movie.movieId;
     formEl.title.value = movie.title;
-    //formEl.releaseDate.value = movie.releaseDate;
     formEl.releaseDate.value = relDat;
-    // set up the associated publisher selection list
+    // set up the associated director selection list
     fillSelectWithOptions( selectDirectorEl, Person.instances, "name");
     // set up the associated actors selection widget
-    createMultipleChoiceWidget( selectActorsWidget, movie.actors,
-        Person.instances, "personId", "name", 1);  // minCard=1
-    // assign associated publisher as the selected option to select element
-//    if (movie.publisher) formEl.selectPublisher.value = movie.publisher.name;
+    if(typeof(movie.actors) !== 'undefined'){
+      createMultipleChoiceWidget( selectActorsWidget, movie.actors,
+          Person.instances, "personId", "name", 1);  // minCard=1
+    } else{
+      createMultipleChoiceWidget( selectActorsWidget, [],
+          Person.instances, "personId", "name", 1);
+    }
     formEl.selectDirector.value = movie.directorId.name;
     saveButton.disabled = false;
   } else {
     formEl.reset();
-//    formEl.selectPublisher.selectedIndex = 0;
     selectActorsWidget.innerHTML = "";
     saveButton.disabled = true;
   }
@@ -231,7 +227,6 @@ updateFormEl["commit"].addEventListener("click", function () {
     Movie.checkDirector(slots.directorId).message
   );
 
-  console.log(slots);
   // add event listeners for responsive validation
   /* MISSING CODE */
   // commit the update only if all form field values are valid
