@@ -135,9 +135,9 @@ class Movie {
     let ymd = [];
     let mon31day = [1, 3, 5, 7, 8, 10, 12]; // Months with 31 days
     if(tmp.length === 3){
-      if(!(isIntegerOrIntegerString(parseInt(tmp[0])) &&
-        isIntegerOrIntegerString(parseInt(tmp[1])) &&
-        isIntegerOrIntegerString(parseInt(tmp[2]))))
+      if(!(isIntegerOrIntegerString(tmp[0]) &&
+        isIntegerOrIntegerString(tmp[1]) &&
+        isIntegerOrIntegerString(tmp[2])))
       {
           return new RangeConstraintViolation("Expected format as YYYY-MM-DD");
       }
