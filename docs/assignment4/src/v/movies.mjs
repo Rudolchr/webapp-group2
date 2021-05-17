@@ -83,6 +83,14 @@ createFormEl.movieId.addEventListener("input", function () {
   createFormEl.movieId.setCustomValidity(
       Movie.checkMovieIdAsId( createFormEl.movieId.value).message);
 });
+createFormEl.releaseDate.addEventListener("input", function () {
+  createFormEl.releaseDate.setCustomValidity(
+      Movie.checkReleaseDate( createFormEl.releaseDate.value).message);
+});
+createFormEl.title.addEventListener("input", function () {
+  createFormEl.title.setCustomValidity(
+      Movie.checkTitle( createFormEl.title.value).message);
+});
 /* SIMPLIFIED/MISSING CODE: add event listeners for responsive
    validation on user input with Movie.checkTitle and checkReleaseDate */
 
@@ -99,7 +107,13 @@ createFormEl["commit"].addEventListener("click", function () {
   console.log(slots);
   // check all input fields and show error messages
   createFormEl.movieId.setCustomValidity(
-      Movie.checkMovieIdAsId( slots.movieId).message);
+    Movie.checkMovieIdAsId( slots.movieId).message);
+  createFormEl.title.setCustomValidity(
+    Movie.checkTitle(slots.title).message
+  );
+  createFormEl.releaseDate.setCustomValidity(
+    Movie.checkReleaseDate(slots.releaseDate).message
+  );
   /* SIMPLIFIED CODE: no before-submit validation of name */
   // get the list of selected actors
   const selActOptions = createFormEl.selectActors.selectedOptions;
