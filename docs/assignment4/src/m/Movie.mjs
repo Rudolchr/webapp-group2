@@ -117,13 +117,17 @@ class Movie {
       return new MandatoryValueConstraintViolation();
     }
 
-    // fix weird behavior of Date datatype
+    if((strDate.match(/-/g) || []).length != 2){
+      return new RangeConstraintViolation("Expected format as YYY-MM-DD");
+    }
+    
     const tmpDate = new Date(strDate);
     strDate = tmpDate.getFullYear() + "-" + (tmpDate.getMonth() + 1) + "-" + tmpDate.getDate();
 
     let tmp = strDate.split('-');
     let ymd = [];
     let mon31day = [1, 3, 5, 7, 8, 10, 12]; // Months with 31 days
+    console.log("length: " + tmp.length);
     if(tmp.length === 3){
       if(!(isIntegerOrIntegerString(tmp[0]) &&
         isIntegerOrIntegerString(tmp[1]) &&
@@ -275,7 +279,7 @@ class Movie {
   }
   // Serialize movie object
   toString() {
-    let movieStr = `Movie{ MovieID: ${this._movieId}, title: ${this._title}, releaseDate: ${this._releaseDate}, 
+    let movieStr = `Movie{ MovieID: ${this._movieId}, title: ${this._title}, releaseDate: ${this._releaseDate},
     director: ${this._directorId}`;
     if (this._actors) movieStr += `, actors: ${Object.keys( this._actors).join(",")} }`;
     return `${movieStr}`;
