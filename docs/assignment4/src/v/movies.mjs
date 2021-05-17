@@ -149,6 +149,20 @@ const updateFormEl = document.querySelector("section#Movie-U > form"),
       "movieId", {displayProp: "title"});
     updateFormEl.reset();
 });
+
+updateFormEl.movieId.addEventListener("input", function () {
+  updateFormEl.movieId.setCustomValidity(
+      Movie.checkMovieIdAsId( updateFormEl.movieId.value).message);
+});
+updateFormEl.releaseDate.addEventListener("input", function () {
+  updateFormEl.releaseDate.setCustomValidity(
+      Movie.checkReleaseDate( updateFormEl.releaseDate.value).message);
+});
+updateFormEl.title.addEventListener("input", function () {
+  updateFormEl.title.setCustomValidity(
+      Movie.checkTitle( updateFormEl.title.value).message);
+});
+
 /**
  * handle movie selection events: when a movie is selected,
  * populate the form with the data of the selected movie
