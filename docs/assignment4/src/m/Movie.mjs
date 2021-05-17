@@ -33,6 +33,7 @@ class Movie {
     return this._movieId;
   }
   static checkMovieId( movieId) {
+    // Check if Number
     if(!isIntegerOrIntegerString(movieId)){
       return new RangeConstraintViolation("The MovieID must be an unsigned integer!");
     } else{
@@ -43,14 +44,18 @@ class Movie {
     let validationResult = Movie.checkMovieId( movieId);
     if ((validationResult instanceof NoConstraintViolation)) {
       if (!movieId) {
+        // Is there input
         validationResult = new MandatoryValueConstraintViolation(
             "A value for the MovieID must be provided!");
       } else if (Movie.instances[movieId]) {
+        // id already taken
         validationResult = new UniquenessConstraintViolation(
             `There is already a movie record with MovieID ${movieId}`);
       } else if(movieId < 1){
+        // Non positive integer
         validationResult = new RangeConstraintViolation("The MovieID must be a positive integer!");
       } else {
+        // fine
         validationResult = new NoConstraintViolation();
       }
     }
@@ -77,10 +82,13 @@ class Movie {
   }
   static checkTitle(t){
     if(!t){
+      // Is there a title?
       return new MandatoryValueConstraintViolation("A title must be provided!");
     } else if(!isNonEmptyString(t)){
+      // Title empty
       return new RangeConstraintViolation("The title must be a non-empty String!");
     } else{
+      // Fine
       return new NoConstraintViolation();
     }
   }
@@ -97,43 +105,45 @@ class Movie {
   }
   static checkReleaseDate(date){
     if(!date){
+      // Date given?
       return new MandatoryValueConstraintViolation("A Release Date must be provided");
     }
     let strDate = null;
     if(date instanceof Date){
+      // convert to string form for ease of computation
       strDate = date.getFullYear() + "-" +
         (date.getMonth() + 1) + "-" +
         date.getDate();
     } else if(typeof(date) == "string"){
       if(!isNonEmptyString(date)){
+        // Given as string and empty
         return new MandatoryValueConstraintViolation("A Release Date must be provided");
       }
       strDate = date;
     } else{
+      // Wrong type given
       return new RangeConstraintViolation("Wrong type given as Date");
     }
 
-    if(!isNonEmptyString(strDate)){
-      return new MandatoryValueConstraintViolation();
-    }
-
+    // check if in correct format for further validation?
     if((strDate.match(/-/g) || []).length != 2){
       return new RangeConstraintViolation("Expected format as YYY-MM-DD");
     }
-    
+
     const tmpDate = new Date(strDate);
     strDate = tmpDate.getFullYear() + "-" + (tmpDate.getMonth() + 1) + "-" + tmpDate.getDate();
 
     let tmp = strDate.split('-');
     let ymd = [];
     let mon31day = [1, 3, 5, 7, 8, 10, 12]; // Months with 31 days
-    console.log("length: " + tmp.length);
+
     if(tmp.length === 3){
       if(!(isIntegerOrIntegerString(tmp[0]) &&
         isIntegerOrIntegerString(tmp[1]) &&
         isIntegerOrIntegerString(tmp[2])))
       {
-          return new RangeConstraintViolation("Expected format as YYYY-MM-DD");
+        // Could not extract date numbers
+        return new RangeConstraintViolation("Expected format as YYYY-MM-DD");
       }
       ymd = [parseInt(tmp[0]), parseInt(tmp[1]), parseInt(tmp[2])];
       // Filter out dates < 1895-12-28
@@ -213,15 +223,18 @@ class Movie {
   }
   static checkDirector(d){
     if(!d){
+      // is given
       return new MandatoryValueConstraintViolation("A Director must be provided!");
     } else if(typeof(d) === "object"){
       if(!Person.instances[String(d.personId)]){
+        // Person does not exist
         return new ReferentialIntegrityConstraintViolation("There is no Person with ID " + d);
       } else{
         return new NoConstraintViolation();
       }
     } else if(typeof(d) === "number"){
       if(!Person.instances[String(d)]){
+        // Person does not exist
         return new ReferentialIntegrityConstraintViolation("Could not find this Person");
       } else{
         return new NoConstraintViolation();
@@ -291,10 +304,6 @@ class Movie {
       // copy only property slots with underscore prefix
       if (p.charAt(0) !== "_") continue;
       switch (p) {
-      /*  case "_publisher":
-          // convert object reference to ID reference
-          if (this._publisher) rec.publisher_id = this._publisher.name;
-          break; */
         case "_actors":
           // convert the map of object references to a list of ID reference
           if (this._actors) {
