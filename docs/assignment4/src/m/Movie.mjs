@@ -131,6 +131,10 @@ class Movie {
       return new MandatoryValueConstraintViolation();
     }
 
+    // fix weird behavior of Date datatype
+    const tmpDate = new Date(strDate);
+    strDate = tmpDate.getFullYear() + "-" + (tmpDate.getMonth() + 1) + "-" + tmpDate.getDate();
+
     let tmp = strDate.split('-');
     let ymd = [];
     let mon31day = [1, 3, 5, 7, 8, 10, 12]; // Months with 31 days
