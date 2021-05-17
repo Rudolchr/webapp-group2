@@ -229,13 +229,13 @@ class Movie {
       return new MandatoryValueConstraintViolation("A Director must be provided!");
     } else if(typeof(d) === "object"){
       if(!Person.instances[String(d.personId)]){
-        return new ReferentialIntegrityConstraintViolation("There is no Person with ID " + id);
+        return new ReferentialIntegrityConstraintViolation("There is no Person with ID " + d);
       } else{
         return new NoConstraintViolation();
       }
     } else if(typeof(d) === "number"){
       if(!Person.instances[String(d)]){
-        return new ReferentialIntegrityConstraintViolation("There is no Person with ID " + id);
+        return new ReferentialIntegrityConstraintViolation("Could not find this Person");
       } else{
         return new NoConstraintViolation();
       }
@@ -340,13 +340,13 @@ Movie.instances = {};
  */
 Movie.add = function (slots) {
   var movie = null;
-  let dir = -1;
-  for(const id in Person.instances){
-    if(Person.instances[id].name === slots.directorId){
-      dir = parseInt(id);
-    }
-  }
-  slots.directorId = dir;
+  //let dir = -1;
+  //for(const id in Person.instances){
+  //  if(Person.instances[id].name === slots.directorId){
+  //    dir = parseInt(id);
+  //  }
+  //}
+  //slots.directorId = dir;
 
   try {
 
@@ -393,14 +393,14 @@ Movie.update = function ({movieId, title, releaseDate,
       }
     }
     if(movie.directorId && movie.directorId.name !== directorId) {
-      let dir = -1;
-      for(const id in Person.instances){
-        if(Person.instances[id].name === directorId){
-          dir = parseInt(id);
-        }
-      }
+      //let dir = -1;
+      //for(const id in Person.instances){
+      //  if(Person.instances[id].name === directorId){
+      //    dir = parseInt(id);
+      //  }
+      //}
 
-      movie.directorId = dir;
+      movie.directorId = directorId;
       updatedProperties.push("directorId");
     }
     // publisher_id may be the empty string for unsetting the optional property
