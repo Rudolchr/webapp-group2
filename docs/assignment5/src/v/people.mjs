@@ -7,7 +7,7 @@
  ***************************************************************/
 import Person from "../m/Person.mjs";
 import Movie from "../m/Movie.mjs";
-import { fillSelectWithOptions } from "../../lib/util.mjs";
+import {createListFromMap, fillSelectWithOptions} from "../../lib/util.mjs";
 
 /***************************************************************
  Load data
@@ -48,6 +48,9 @@ document.getElementById("retrieveAndListAll")
       const row = tableBodyEl.insertRow();
       row.insertCell().textContent = person.personId;
       row.insertCell().textContent = person.name;
+      //place for retrieve director
+      const playListEl = createListFromMap(person.playedMovies, "title");
+      row.insertCell().appendChild( playListEl);
     }
     document.getElementById("Person-M").style.display = "none";
     document.getElementById("Person-R").style.display = "block";

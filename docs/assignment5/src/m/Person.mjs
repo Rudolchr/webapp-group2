@@ -22,6 +22,13 @@ class Person {
     // assign properties by invoking implicit setters
     this._personId = personId;  // number (integer)
     this._name = name;  // string
+
+    // derived inverse reference property (inverse of Movie::director)
+    this._directedMovies = {};  // initialize as an empty map of Movie objects
+    // derived inverse reference property (inverse of Movie::actors)
+    this._playedMovies = {};  // initialize as an empty map of Movie objects
+
+
   }
   get personId() {
     return this._personId;
@@ -93,13 +100,27 @@ class Person {
       throw constraintViolation;
     }
   }
+  get directedMovies(){
+    return this._directedMovies;
+  }
+  get playedMovies(){
+    return this._playedMovies
+  }
   toJSON() {  // is invoked by JSON.stringify
     let rec = {};
     for (const p of Object.keys( this)) {
-      // remove underscore prefix
-      if (p.charAt(0) === "_") rec[p.substr(1)] = this[p];
+      // keep underscore-prefixed properties except "_playedMovies" & "_directedMovies"
+      if (p.charAt(0) === "_" && p !== "_playedMovies" && p !== "_directedMovies") {
+        // remove underscore prefix
+        rec[p.substr(1)] = this[p];
+      }
     }
     return rec;
+  }
+  toString() {
+    let movieStr = `Person{ PersonID: ${this._personId}, name: ${this._name}, directed movies: 
+    ${Object.keys( this._directedMovies).join(",")}, played movies: ${Object.keys( this._playedMovies).join(",")}`;
+    return `${movieStr}`;
   }
 }
 /****************************************************
