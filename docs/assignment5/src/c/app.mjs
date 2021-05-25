@@ -53,7 +53,7 @@ function generateTestData() {
       title: "Pulp Fiction",
       releaseDate: new Date("1994-05-12"),
       directorId : 3,
-      actorsIdRefs: [5,6]
+      actorsIdRefs: [3,5,6]
     });
     Movie.instances["2"] = new Movie({
       movieId: 2,
