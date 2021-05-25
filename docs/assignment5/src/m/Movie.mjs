@@ -217,6 +217,8 @@ class Movie {
       } else {
         this._directorId = Person.instances[String(d.personId)];
       }
+      delete this._directorId._directedMovies[this.movieId];
+      this._directorId._directedMovies[this.movieId] = this;
     } else{
       throw validationResult;
     }

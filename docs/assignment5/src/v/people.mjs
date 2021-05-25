@@ -46,10 +46,11 @@ document.getElementById("retrieveAndListAll")
     for (let key of Object.keys( Person.instances)) {
       const person = Person.instances[key];
       const row = tableBodyEl.insertRow();
+      const directList = createListFromMap(person.directedMovies, "title");
+      const playListEl = createListFromMap(person.playedMovies, "title");
       row.insertCell().textContent = person.personId;
       row.insertCell().textContent = person.name;
-      //place for retrieve director
-      const playListEl = createListFromMap(person.playedMovies, "title");
+      row.insertCell().appendChild(directList);
       row.insertCell().appendChild( playListEl);
     }
     document.getElementById("Person-M").style.display = "none";
