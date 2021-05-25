@@ -20,8 +20,8 @@ class Person {
   // using a single record parameter with ES6 function parameter destructuring
   constructor ({personId, name}) {
     // assign properties by invoking implicit setters
-    this._personId = personId;  // number (integer)
-    this._name = name;  // string
+    this.personId = personId;  // number (integer)
+    this.name = name;  // string
 
     // derived inverse reference property (inverse of Movie::director)
     this._directedMovies = {};  // initialize as an empty map of Movie objects
@@ -118,7 +118,7 @@ class Person {
     return rec;
   }
   toString() {
-    let movieStr = `Person{ PersonID: ${this._personId}, name: ${this._name}, directed movies: 
+    let movieStr = `Person{ PersonID: ${this._personId}, name: ${this._name}, directed movies:
     ${Object.keys( this._directedMovies).join(",")}, played movies: ${Object.keys( this._playedMovies).join(",")}`;
     return `${movieStr}`;
   }
