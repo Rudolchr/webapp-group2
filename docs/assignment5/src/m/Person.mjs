@@ -196,7 +196,6 @@ Person.destroy = function (personId){
     // first update actors in movie
     const movie = person.directedMovies[movieIdx];
     for(const actIdx in movie.actors){
-      console.log(actIdx);
       delete person.directedMovies[movieIdx].actors[actIdx].playedMovies[movieIdx];
     }
     Movie.destroy(person.directedMovies[movieIdx].movieId);
