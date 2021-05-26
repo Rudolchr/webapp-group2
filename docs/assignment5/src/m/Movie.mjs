@@ -180,7 +180,6 @@ class Movie {
        * https://klexikon.zum.de/wiki/Schaltjahr
        */
       let schalt = !(ymd[0] % 4) && ((ymd[0] % 100) || !(ymd[0] % 400));
-      //console.log("y: " + ymd[0] + ", m: " + ymd[1] + ", d: " + ymd[2] + ", sch: " + schalt);
 
       // Range test for days
       if(ymd[2] < 1 || ymd[2] > 31){

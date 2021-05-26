@@ -175,28 +175,6 @@ Person.update = function ({personId, name}) {
     }
   }
 };
-/**
- *  Delete an person object/record
- *  Since the movie-person association is unidirectional, a linear search on all
- *  movies is required for being able to delete the person from the movies' actors/director.
- */
-
-//Person.destroy = function (personId) {
-//  const person = Person.instances[personId];
-//  // delete all dependent movie records
-//  for (const movieId of Object.keys( Movie.instances)) {
-//    const movie = Movie.instances[movieId];
-//    //actors are optional, so only there are just not associated to movie anymore
-//    if (movie.actors) {
-//      if (movie.actors[personId]) delete movie.actors[personId];
-//    }
-//    //director is mandatory, so if director is deleted, so are his movies
-//    if (movie.directorId.personId === parseInt(personId)) Movie.destroy(movie.movieId);
-//  }
-//  // delete the person object
-//  delete Person.instances[personId];
-//  console.log( `Person ${person.name} deleted.`);
-//};
 
 /**
  *  Delete an person object/record
@@ -215,6 +193,12 @@ Person.destroy = function (personId){
 
   for(const movieIdx in person.directedMovies){
     // If mandatory director is deleted, delete all associated movies
+    // first update actors in movie
+    const movie = person.directedMovies[movieIdx];
+    for(const actIdx in movie.actors){
+      console.log(actIdx);
+      delete person.directedMovies[movieIdx].actors[actIdx].playedMovies[movieIdx];
+    }
     Movie.destroy(person.directedMovies[movieIdx].movieId);
   }
 

@@ -217,6 +217,7 @@ updateFormEl["commit"].addEventListener("click", function () {
     directorId: dir
   }
 
+  // add event listeners for responsive validation
   updateFormEl.title.setCustomValidity(
     Movie.checkTitle(slots.title).message
   );
@@ -227,8 +228,6 @@ updateFormEl["commit"].addEventListener("click", function () {
     Movie.checkDirector(slots.directorId).message
   );
 
-  // add event listeners for responsive validation
-  /* MISSING CODE */
   // commit the update only if all form field values are valid
   if (updateFormEl.checkValidity()) {
     // construct actorIdRefs-ToAdd/ToRemove lists from the association list
