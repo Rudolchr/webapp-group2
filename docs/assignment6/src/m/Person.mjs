@@ -23,10 +23,10 @@ class Person {
     this.personId = personId;  // number (integer)
     this.name = name;  // string
 
-    // derived inverse reference property (inverse of Movie::director)
-    this._directedMovies = {};  // initialize as an empty map of Movie objects
-    // derived inverse reference property (inverse of Movie::actors)
-    this._playedMovies = {};  // initialize as an empty map of Movie objects
+//    // derived inverse reference property (inverse of Movie::director)
+//    this._directedMovies = {};  // initialize as an empty map of Movie objects
+//    // derived inverse reference property (inverse of Movie::actors)
+//    this._playedMovies = {};  // initialize as an empty map of Movie objects
 
 
   }
@@ -45,17 +45,18 @@ class Person {
       }
     }
   }
-  static checkPersonIdAsId( id) {
+  static checkPersonIdAsId( id, DirectType) {
+    if (!DirectType) DirectType = Person; //default
+    id = parseInt( id);
+    if (isNaN(id)) {
+      return new MandatoryValueConstraintViolation(
+          "A positive integer value for the person ID is required!");
+    }
     let constraintViolation = Person.checkPersonId();
     if ((constraintViolation instanceof NoConstraintViolation)) {
-      // convert to integer
-      id = parseInt(id);
-      if (isNaN(id)) {
-        return new MandatoryValueConstraintViolation(
-            "A positive integer value for the person ID is required!");
-      } else if (Person.instances[String(id)]) {  // convert to string if number
+      if (DirectType.instances[id]) {
         constraintViolation = new UniquenessConstraintViolation(
-            "There is already a person record with this person ID!");
+            `There is already a ${DirectType.name} record with this person ID!`);
       } else {
         constraintViolation = new NoConstraintViolation();
       }
@@ -100,12 +101,12 @@ class Person {
       throw constraintViolation;
     }
   }
-  get directedMovies(){
-    return this._directedMovies;
-  }
-  get playedMovies(){
-    return this._playedMovies
-  }
+//  get directedMovies(){
+//    return this._directedMovies;
+//  }
+//  get playedMovies(){
+//    return this._playedMovies
+//  }
   toJSON() {  // is invoked by JSON.stringify
     let rec = {};
     for (const p of Object.keys( this)) {
@@ -128,6 +129,7 @@ class Person {
 *****************************************************/
 // initially an empty collection (in the form of a map)
 Person.instances = {};
+Person.subtypes = [];
 
 /**********************************************************
  ***  Class-level ("static") storage management methods ***
@@ -183,27 +185,31 @@ Person.update = function ({personId, name}) {
  *  movies' actors/director.
  */
 Person.destroy = function (personId){
-  console.log("type personid: " + typeof(personId));
   const person = Person.instances[personId];
-
-  for(const movieIdx in person.playedMovies){
-    // Delete actor in all movies he played in
-    delete person.playedMovies[movieIdx].actors[parseInt(personId)];
-  }
-
-  for(const movieIdx in person.directedMovies){
-    // If mandatory director is deleted, delete all associated movies
-    // first update actors in movie
-    const movie = person.directedMovies[movieIdx];
-    for(const actIdx in movie.actors){
-      delete person.directedMovies[movieIdx].actors[actIdx].playedMovies[movieIdx];
-    }
-    Movie.destroy(person.directedMovies[movieIdx].movieId);
-  }
-
-  // Delete Person object
   delete Person.instances[personId];
+
+  for (const Subtype of Person.subtypes) {
+   if (personId in Subtype.instances) delete Subtype.instances[personId];
+  }
   console.log(`Person ${person.name} deleted.`);
+//  for(const movieIdx in person.playedMovies){
+//    // Delete actor in all movies he played in
+//    delete person.playedMovies[movieIdx].actors[parseInt(personId)];
+//  }
+
+//  for(const movieIdx in person.directedMovies){
+//    // If mandatory director is deleted, delete all associated movies
+//    // first update actors in movie
+//    const movie = person.directedMovies[movieIdx];
+//    for(const actIdx in movie.actors){
+//      delete person.directedMovies[movieIdx].actors[actIdx].playedMovies[movieIdx];
+//    }
+//    Movie.destroy(person.directedMovies[movieIdx].movieId);
+//  }
+//
+//  // Delete Person object
+//  delete Person.instances[personId];
+//  console.log(`Person ${person.name} deleted.`);
 }
 
 /**
