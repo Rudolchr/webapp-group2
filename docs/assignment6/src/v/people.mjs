@@ -6,14 +6,14 @@
  Import classes, datatypes and utility procedures
  ***************************************************************/
 import Person from "../m/Person.mjs";
-import Movie from "../m/Movie.mjs";
+import Director from "../m/Director.mjs";
+import Actor from "../m/Actor.mjs";
 import {createListFromMap, fillSelectWithOptions} from "../../lib/util.mjs";
 
 /***************************************************************
  Load data
  ***************************************************************/
 Person.retrieveAll();
-Movie.retrieveAll();
 
 /***************************************************************
  Set up general, use-case-independent UI elements
@@ -33,7 +33,9 @@ for (let frm of document.querySelectorAll("section > form")) {
 window.addEventListener("beforeunload", function () {
   Person.saveAll();
   // also save movies because movies may be deleted when a director is deleted
-  Movie.saveAll();
+  for (const Subtype of Person.subtypes) {
+      Subtype.saveAll();
+  }
 });
 
 /**********************************************
@@ -46,12 +48,13 @@ document.getElementById("retrieveAndListAll")
     for (let key of Object.keys( Person.instances)) {
       const person = Person.instances[key];
       const row = tableBodyEl.insertRow();
-      const directList = createListFromMap(person.directedMovies, "title");
-      const playListEl = createListFromMap(person.playedMovies, "title");
+      const roles = [];
       row.insertCell().textContent = person.personId;
       row.insertCell().textContent = person.name;
-      row.insertCell().appendChild(directList);
-      row.insertCell().appendChild( playListEl);
+      for (const Subtype of Person.subtypes) {
+        if (person.personId in Subtype.instances) roles.push( Subtype.name);
+      }
+        row.insertCell().textContent = roles.toString();
     }
     document.getElementById("Person-M").style.display = "none";
     document.getElementById("Person-R").style.display = "block";
