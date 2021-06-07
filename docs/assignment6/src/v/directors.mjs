@@ -10,7 +10,6 @@
  ***************************************************************/
 import Director from "../m/Director.mjs";
 import Person from "../m/Person.mjs";
-import { displaySegmentFields, undisplayAllSegmentFields } from "./app.mjs"
 import { fillSelectWithOptions } from "../../lib/util.mjs";
 
 /***************************************************************
@@ -70,7 +69,10 @@ createFormEl.personId.addEventListener("input", function () {
     createFormEl.personId.setCustomValidity(
         Person.checkPersonIdAsId( createFormEl.personId.value, Director).message);
 });
-/* SIMPLIFIED CODE: no responsive validation of name and biography */
+createFormEl.name.addEventListener("input", function () {
+    createFormEl.name.setCustomValidity(
+        Person.checkName( createFormEl.name.value).message);
+});
 
 // handle Save button click events
 createFormEl["commit"].addEventListener("click", function () {
@@ -81,7 +83,8 @@ createFormEl["commit"].addEventListener("click", function () {
     // check all input fields and show error messages
     createFormEl.personId.setCustomValidity(
         Person.checkPersonIdAsId( slots.personId).message, Director);
-    /* SIMPLIFIED CODE: no before-submit validation of name */
+    createFormEl.name.setCustomValidity(
+        Person.checkName( slots.name).message);
     // save the input data only if all form fields are valid
     if (createFormEl.checkValidity()) Director.add( slots);
 });
@@ -92,8 +95,6 @@ createFormEl.personId.addEventListener("change", function () {
         createFormEl.name.value = Person.instances[persId].name;
     }
 });
-
-/* Incomplete code: no responsive validation of "name" */
 
 /**********************************************
  * Use case Update Director
@@ -111,6 +112,11 @@ document.getElementById("Update").addEventListener("click", function () {
     document.getElementById("Director-U").style.display = "block";
     updateFormEl.reset();
 });
+
+updateFormEl.name.addEventListener("input", function () {
+    updateFormEl.name.setCustomValidity(
+        Person.checkName( updateFormEl.name.value).message);
+});
 // handle change events on director select element
 updSelDirectorEl.addEventListener("change", handleDirectorSelectChangeEvent);
 
@@ -123,11 +129,12 @@ updateFormEl["commit"].addEventListener("click", function () {
         name: updateFormEl.name.value,
     }
     // check all property constraints
-    /*SIMPLIFIED CODE: no before-save validation of name */
+    updateFormEl.name.setCustomValidity(
+        Person.checkName( slots.name).message);
     // save the input data only if all of the form fields are valid
     if (updSelDirectorEl.checkValidity()) {
         Director.update( slots);
-        // update the author selection list's option element
+        // update the actor selection list's option element
         updSelDirectorEl.options[updSelDirectorEl.selectedIndex].text = slots.name;
     }
 });

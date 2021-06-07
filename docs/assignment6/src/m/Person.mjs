@@ -4,7 +4,6 @@
  *                and retrieveAll
  * @author Gerd Wagner
  */
-import Movie from "./Movie.mjs";
 import {cloneObject, isNonEmptyString} from "../../lib/util.mjs";
 import { NoConstraintViolation, MandatoryValueConstraintViolation,
   RangeConstraintViolation, UniquenessConstraintViolation,
@@ -22,13 +21,6 @@ class Person {
     // assign properties by invoking implicit setters
     this.personId = personId;  // number (integer)
     this.name = name;  // string
-
-//    // derived inverse reference property (inverse of Movie::director)
-//    this._directedMovies = {};  // initialize as an empty map of Movie objects
-//    // derived inverse reference property (inverse of Movie::actors)
-//    this._playedMovies = {};  // initialize as an empty map of Movie objects
-
-
   }
   get personId() {
     return this._personId;
@@ -45,6 +37,9 @@ class Person {
       }
     }
   }
+  /*
+   Checks ID uniqueness constraint against the direct type of a Person object
+   */
   static checkPersonIdAsId( id, DirectType) {
     if (!DirectType) DirectType = Person; //default
     id = parseInt( id);
@@ -74,7 +69,8 @@ class Person {
     return constraintViolation;
   }
   set personId( id) {
-    const constraintViolation = Person.checkPersonIdAsId( id);
+    // this.constructor may be Person or any category of it
+    const constraintViolation = Person.checkPersonIdAsId( id, this.constructor);
     if (constraintViolation instanceof NoConstraintViolation) {
       this._personId = parseInt( id);
     } else {
@@ -101,12 +97,6 @@ class Person {
       throw constraintViolation;
     }
   }
-//  get directedMovies(){
-//    return this._directedMovies;
-//  }
-//  get playedMovies(){
-//    return this._playedMovies
-//  }
   toJSON() {  // is invoked by JSON.stringify
     let rec = {};
     for (const p of Object.keys( this)) {
@@ -192,24 +182,6 @@ Person.destroy = function (personId){
    if (personId in Subtype.instances) delete Subtype.instances[personId];
   }
   console.log(`Person ${person.name} deleted.`);
-//  for(const movieIdx in person.playedMovies){
-//    // Delete actor in all movies he played in
-//    delete person.playedMovies[movieIdx].actors[parseInt(personId)];
-//  }
-
-//  for(const movieIdx in person.directedMovies){
-//    // If mandatory director is deleted, delete all associated movies
-//    // first update actors in movie
-//    const movie = person.directedMovies[movieIdx];
-//    for(const actIdx in movie.actors){
-//      delete person.directedMovies[movieIdx].actors[actIdx].playedMovies[movieIdx];
-//    }
-//    Movie.destroy(person.directedMovies[movieIdx].movieId);
-//  }
-//
-//  // Delete Person object
-//  delete Person.instances[personId];
-//  console.log(`Person ${person.name} deleted.`);
 }
 
 /**
@@ -222,7 +194,6 @@ Person.retrieveAll = function () {
     people = JSON.parse( localStorage["people"]);
   } catch (e) {
     console.log( "Error when reading from Local Storage\n" + e);
-    people = {};
   }
   for (const key of Object.keys( people)) {
     try {
@@ -232,7 +203,14 @@ Person.retrieveAll = function () {
       console.log( `${e.constructor.name} while deserializing person ${key}: ${e.message}`);
     }
   }
-  console.log( `${Object.keys( people).length} person records loaded.`);
+  // add all instances of all subtypes to Person.instances
+  for (const Subtype of Person.subtypes) {
+    Subtype.retrieveAll();
+    for (const key of Object.keys( Subtype.instances)) {
+      Person.instances[key] = Subtype.instances[key];
+    }
+  }
+  console.log(`${Object.keys( Person.instances).length} Person records loaded.`);
 };
 /**
  *  Save all person objects as records

@@ -15,6 +15,7 @@ import {
     ReferentialIntegrityConstraintViolation
 } from "../../lib/errorTypes.mjs";
 
+
 /**
  * The class Actor
  * @class
@@ -22,36 +23,34 @@ import {
 class Actor extends Person {
     constructor({personId, name, agent}) {
         super({personId, name});
-        this.agent = agent;
-    }
-    get agent() {return this._agent}
-    static checkAgent(a){
-        if(!a){
-            // is given
-            return new MandatoryValueConstraintViolation("An agent must be provided!");
-        } else if(typeof(a) === "object"){
-            if(!Person.instances[String(a.personId)]){
-                // Person does not exist
-                return new ReferentialIntegrityConstraintViolation("There is no Person with ID " + a);
-            } else{
-                return new NoConstraintViolation();
-            }
-        } else if(typeof(a) === "number"){
-            if(!Person.instances[String(a)]){
-                // Person does not exist
-                return new ReferentialIntegrityConstraintViolation("Could not find this Person");
-            } else{
-                return new NoConstraintViolation();
-            }
+        if(agent) {
+            this.agent = agent;
         }
     }
-    set agent(a){
+    get agent() {return this._agent}
+    static checkAgent( a){
+       if(a){
+            if(typeof(a) === "number") {
+                if (!Person.instances[String(a)]) {
+                    // Person does not exist
+                    return new ReferentialIntegrityConstraintViolation("Could not find this Person");
+                } else {
+                    return new NoConstraintViolation();
+                }
+            } else if (typeof(a) === "string"){
+                return new NoConstraintViolation();
+            }
+        } else {
+            return new NoConstraintViolation();
+        }
+    }
+    set agent( a){
         const validationResult = Actor.checkAgent(a);
         if(validationResult instanceof NoConstraintViolation){
-            if(typeof(a === "number")){
-                this._agent = Person.instances[String(a)];
+            if(typeof(a) === "number"){
+                this._agent = Person.instances[String(a)].name;
             } else {
-                this._agent = Person.instances[String(a.personId)];
+                this._agent = a;
             }
         } else{
             throw validationResult;
@@ -125,7 +124,7 @@ Actor.update = function ({personId, name, agent}) {
 Actor.destroy = function (personId) {
     const actor = Actor.instances[personId];
     delete Actor.instances[personId];
-    console.log(`Author ${actor.name} deleted.`);
+    console.log(`Actor ${actor.name} deleted.`);
 };
 /**
  *  Retrieve all author objects as records

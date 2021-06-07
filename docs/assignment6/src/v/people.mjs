@@ -1,5 +1,5 @@
 /**
- * @fileOverview  View code of UI for managing Author data
+ * @fileOverview  View code of UI for managing Actor data
  * @author Gerd Wagner
  */
 /***************************************************************

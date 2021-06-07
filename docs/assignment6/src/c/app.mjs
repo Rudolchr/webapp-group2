@@ -3,6 +3,8 @@
  * @author Gerd Wagner
  */
 import Person from "../m/Person.mjs";
+import Actor from "../m/Actor.mjs";
+import Director from "../m/Director.mjs";
 import Movie from "../m/Movie.mjs";
 
 /*******************************************
@@ -13,41 +15,93 @@ import Movie from "../m/Movie.mjs";
  */
 function generateTestData() {
   try {
-    Person.instances["1"] = new Person({
+    Person.instances["16"] = new Person({
+      personId: 16,
+      name: "John Forbes Nash"
+    });
+    Person.instances["17"] = new Person({
+      personId: 17,
+      name: "John Doe"
+    });
+    Person.instances["18"] = new Person({
+      personId: 18,
+      name: "Jane Doe"
+    });
+    Person.saveAll();
+    Director.instances["1"] = new Director({
       personId: 1,
       name: "Stephen Frears"
     });
-    Person.instances["2"] = new Person({
+    Director.instances["2"] = new Director({
       personId: 2,
       name: "George Lucas"
     });
-    Person.instances["3"] = new Person({
+    Director.instances["3"] = new Director({
       personId: 3,
       name: "Quentin Tarantino"
     });
-    Person.instances["5"] = new Person({
-      personId: 5,
-      name: "Uma Thurman"
+    Actor.instances["3"] = new Actor({
+      personId: 3,
+      name: "Quentin Tarantino"
     });
-    Person.instances["6"] = new Person({
+    Actor.instances["5"] = new Actor({
+      personId: 5,
+      name: "Uma Thurman",
+      agent: 17
+    });
+    Actor.instances["6"] = new Actor({
       personId: 6,
       name: "John Travolta"
     });
-    Person.instances["7"] = new Person({
+    Actor.instances["7"] = new Actor({
       personId: 7,
       name: "Ewan McGregor"
     });
-    Person.instances["8"] = new Person({
+    Actor.instances["8"] = new Actor({
       personId: 8,
       name: "Natalie Portman"
     });
-    Person.instances["9"] = new Person({
+    Actor.instances["9"] = new Actor({
       personId: 9,
-      name: "Keanu Reeves"
+      name: "Keanu Reeves",
+      agent: 18
+    });
+    Actor.instances["10"] = new Actor({
+      personId: 10,
+      name: "Russell Crowe",
+      agent: 18
+    });
+    Director.instances["10"] = new Director({
+      personId: 10,
+      name: "Russell Crowe"
+    });
+    Actor.instances["11"] = new Actor({
+      personId: 11,
+      name: "Seth MacFarlane"
+    });
+    Actor.instances["12"] = new Actor({
+      personId: 12,
+      name: "Naomi Watts"
+    });
+    Director.instances["13"] = new Director({
+      personId: 13,
+      name: "Daniel Minahan"
+    });
+    Actor.instances["14"] = new Actor({
+      personId: 14,
+      name: "Ed Harris",
+      agent: 17
+    });
+    Director.instances["15"] = new Director({
+      personId: 15,
+      name: "Marc Forster"
     });
 
-    Person.saveAll();
 
+    Actor.saveAll();
+    Director.saveAll();
+
+    /*
     Movie.instances["1"] = new Movie({
       movieId: 1,
       title: "Pulp Fiction",
@@ -69,7 +123,7 @@ function generateTestData() {
       directorId : 1,
       actorsIdRefs: [9,5]
     });
-    Movie.saveAll();
+    Movie.saveAll(); */
   } catch (e) {
     console.log( `${e.constructor.name}: ${e.message}`);
   }

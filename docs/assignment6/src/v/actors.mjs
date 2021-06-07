@@ -11,11 +11,14 @@
 import Actor from "../m/Actor.mjs";
 import Person from "../m/Person.mjs";
 import { fillSelectWithOptions } from "../../lib/util.mjs";
+import Director from "../m/Director.mjs";
 
 /***************************************************************
  Load data
  ***************************************************************/
-Actor.retrieveAll();
+//With Actor create doesn't work correctly and for Person - update
+Person.retrieveAll();
+//Actor.retrieveAll();
 
 /***************************************************************
  Set up general, use-case-independent UI elements
@@ -47,9 +50,13 @@ document.getElementById("RetrieveAndListAll").addEventListener("click", function
     for (const key of Object.keys( Actor.instances)) {
         const actor = Actor.instances[key];
         const row = tableBodyEl.insertRow();
+        let agent = "";
+        if (actor.agent !== undefined){
+            agent = actor.agent;
+        }
         row.insertCell().textContent = actor.personId;
         row.insertCell().textContent = actor.name;
-        row.insertCell().textContent = actor.agent;
+        row.insertCell().textContent = agent;
     }
     document.getElementById("Actor-M").style.display = "none";
     document.getElementById("Actor-R").style.display = "block";
@@ -58,11 +65,13 @@ document.getElementById("RetrieveAndListAll").addEventListener("click", function
 /**********************************************
  * Use case Create Actor
  **********************************************/
-const createFormEl = document.querySelector("section#Author-C > form");
+const createFormEl = document.querySelector("section#Actor-C > form"),
+    selectCreateAgentEl = createFormEl.selectAgent;
 //----- set up event handler for menu item "Create" -----------
 document.getElementById("Create").addEventListener("click", function () {
     document.getElementById("Actor-M").style.display = "none";
     document.getElementById("Actor-C").style.display = "block";
+    fillSelectWithOptions( selectCreateAgentEl, Person.instances, "name");
     createFormEl.reset();
 });
 // set up event handlers for responsive constraint validation
@@ -70,7 +79,10 @@ createFormEl.personId.addEventListener("input", function () {
     createFormEl.personId.setCustomValidity(
         Person.checkPersonIdAsId( createFormEl.personId.value, Actor).message);
 });
-/* SIMPLIFIED CODE: no responsive validation of name and agent */
+createFormEl.name.addEventListener("input", function () {
+    createFormEl.name.setCustomValidity(
+        Person.checkName( createFormEl.name.value).message);
+});
 
 /**
  * handle save events
@@ -78,21 +90,22 @@ createFormEl.personId.addEventListener("input", function () {
 createFormEl["commit"].addEventListener("click", function () {
     const slots = {
         personId: createFormEl.personId.value,
-        name: createFormEl.name.value,
-        agent: createFormEl.agent.value
+        name: createFormEl.name.value
     };
     // check all input fields and show error messages
     createFormEl.personId.setCustomValidity(
         Person.checkPersonIdAsId( slots.personId).message, Actor);
-    /* SIMPLIFIED CODE: no before-submit validation of name */
-    // save the input data only if all form fields are valid
+    createFormEl.name.setCustomValidity(
+        Person.checkName(slots.name).message
+    );
     if (createFormEl.checkValidity()) Actor.add( slots);
 });
 
 /**********************************************
  * Use case Update Actor
  **********************************************/
-const updateFormEl = document.querySelector("section#Actor-U > form");
+const updateFormEl = document.querySelector("section#Actor-U > form"),
+    selectUpdateAgentEl = updateFormEl.selectAgent;
 const updSelActorEl = updateFormEl.selectActor;
 // handle click event for the menu item "Update"
 document.getElementById("Update").addEventListener("click", function () {
@@ -101,6 +114,7 @@ document.getElementById("Update").addEventListener("click", function () {
     // populate the selection list
     fillSelectWithOptions( updSelActorEl, Actor.instances,
         "personId", {displayProp:"name"});
+    fillSelectWithOptions( selectUpdateAgentEl, Person.instances, "name");
     document.getElementById("Actor-M").style.display = "none";
     document.getElementById("Actor-U").style.display = "block";
     updateFormEl.reset();
@@ -114,12 +128,18 @@ updateFormEl["commit"].addEventListener("click", function () {
     if (!actorIdRef) return;
     const slots = {
         personId: updateFormEl.personId.value,
-        name: updateFormEl.name.value,
-        agent: updateFormEl.agent.value
+        name: updateFormEl.name.value
     }
     // check all property constraints
-    /* SIMPLIFIED CODE: no before-save validation of name */
+    updateFormEl.name.addEventListener("input", function () {
+        updateFormEl.name.setCustomValidity(
+            Person.checkName( updateFormEl.name.value).message);
+    });
     // save the input data only if all of the form fields are valid
+    createFormEl.name.setCustomValidity(
+        Person.checkName(slots.name).message
+    );
+
     if (updSelActorEl.checkValidity()) {
         Actor.update( slots);
         // update the actor selection list's option element
