@@ -12,6 +12,7 @@
  */
 import Person from "./Person.mjs";
 import { cloneObject } from "../../lib/util.mjs";
+import Actor from "./Actor.mjs";
 
 /**
  * Constructor function for the class Director
@@ -47,15 +48,15 @@ Person.subtypes.push( Director);
  * @param {{personId: string, name: string}} slots - A record of parameters.
  */
 Director.add = function (slots) {
-    let emp = null;
+    let dir = null;
     try {
-        emp = new Director( slots);
+        dir = new Director( slots);
     } catch (e) {
         console.log(`${e.constructor.name}: ${e.message}`)
     }
-    if (emp) {
-        Director.instances[emp.personId] = emp;
-        console.log(`${emp.toString()} created!`);
+    if (dir) {
+        Director.instances[dir.personId] = dir;
+        console.log(`${dir.toString()} created!`);
     }
 };
 /**
@@ -65,6 +66,9 @@ Director.add = function (slots) {
  * @param {{personId: string, name: stringr}} slots - A record of parameters.
  */
 Director.update = function ({personId, name}) {
+    console.log("Jestem w reżyserze");
+    console.log(personId);
+    console.log(name);
     const emp = Director.instances[personId],
         objectBeforeUpdate = cloneObject( emp);
     let noConstraintViolated = true, updatedProperties = [];

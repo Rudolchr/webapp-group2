@@ -73,7 +73,7 @@ document.getElementById("create")
 // set up event handlers for responsive constraint validation
 createFormEl.personId.addEventListener("input", function () {
   createFormEl.personId.setCustomValidity(
-      Person.checkPersonIdAsId( createFormEl.personId.value, Actor).message);
+      Person.checkPersonIdAsId( createFormEl.personId.value).message);
 });
 createFormEl.name.addEventListener("input", function () {
     createFormEl.name.setCustomValidity(
@@ -88,7 +88,7 @@ createFormEl["commit"].addEventListener("click", function () {
   };
   // check all input fields and show error messages
   createFormEl.personId.setCustomValidity(
-      Person.checkPersonIdAsId( slots.personId, Actor).message);
+      Person.checkPersonIdAsId( slots.personId).message);
   createFormEl.name.setCustomValidity(
       Person.checkName( slots.name).message);
   // save the input data only if all form fields are valid
@@ -109,6 +109,12 @@ document.getElementById("update")
       "personId", {displayProp:"name"});
     updateFormEl.reset();
   });
+
+updateFormEl.name.addEventListener("input", function () {
+    updateFormEl.name.setCustomValidity(
+        Person.checkName( updateFormEl.name.value).message);
+});
+
 selectUpdatePersonEl.addEventListener("change", handlePersonSelectChangeEvent);
 
 // handle Save button click events
@@ -120,7 +126,8 @@ updateFormEl["commit"].addEventListener("click", function () {
     name: updateFormEl.name.value
   }
   // check all property constraints
-  updateFormEl.name.setCustomValidity( Person.checkName( slots.name).message);
+  updateFormEl.name.setCustomValidity(
+      Person.checkName( slots.name).message);
   // save the input data only if all of the form fields are valid
   if (selectUpdatePersonEl.checkValidity()) {
     Person.update( slots);
@@ -133,15 +140,15 @@ updateFormEl["commit"].addEventListener("click", function () {
  * when a person is selected, populate the form with the data of the selected person
  */
 function handlePersonSelectChangeEvent () {
-  var key = "", auth = null;
-  key = updateFormEl.selectPerson.value;
-  if (key) {
-    auth = Person.instances[key];
-    updateFormEl.personId.value = auth.personId;
-    updateFormEl.name.value = auth.name;
-  } else {
-    updateFormEl.reset();
-  }
+    let key = "", per = null;
+    key = updateFormEl.selectPerson.value;
+    if (key) {
+        per = Person.instances[key];
+        updateFormEl.personId.value = per.personId;
+        updateFormEl.name.value = per.name;
+    } else {
+        updateFormEl.reset();
+    }
 }
 
 /**********************************************

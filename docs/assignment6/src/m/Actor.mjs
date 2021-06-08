@@ -10,10 +10,10 @@
 import Person from "./Person.mjs";
 import { cloneObject } from "../../lib/util.mjs";
 import {
-    MandatoryValueConstraintViolation,
     NoConstraintViolation,
     ReferentialIntegrityConstraintViolation
 } from "../../lib/errorTypes.mjs";
+import Director from "./Director.mjs";
 
 
 /**

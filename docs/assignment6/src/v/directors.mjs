@@ -15,7 +15,7 @@ import { fillSelectWithOptions } from "../../lib/util.mjs";
 /***************************************************************
  Load data
  ***************************************************************/
-Director.retrieveAll();
+Person.retrieveAll();
 
 /***************************************************************
  Set up general, use-case-independent UI elements
@@ -82,7 +82,7 @@ createFormEl["commit"].addEventListener("click", function () {
     };
     // check all input fields and show error messages
     createFormEl.personId.setCustomValidity(
-        Person.checkPersonIdAsId( slots.personId).message, Director);
+        Person.checkPersonIdAsId( slots.personId, Director).message);
     createFormEl.name.setCustomValidity(
         Person.checkName( slots.name).message);
     // save the input data only if all form fields are valid

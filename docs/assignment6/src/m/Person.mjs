@@ -176,10 +176,22 @@ Person.update = function ({personId, name}) {
  */
 Person.destroy = function (personId){
   const person = Person.instances[personId];
-  delete Person.instances[personId];
+
 
   for (const Subtype of Person.subtypes) {
-   if (personId in Subtype.instances) delete Subtype.instances[personId];
+   if (personId in Subtype.instances) {
+     delete Subtype.instances[personId];
+   }
+
+   for (const subtypeId of Object.keys( Subtype.instances)){
+     let sub = Subtype.instances[subtypeId];
+     if (sub.agent){
+       if (sub.agent === person.name){
+         sub.agent = "";
+       }
+     }
+   }
+   delete Person.instances[personId];
   }
   console.log(`Person ${person.name} deleted.`);
 }

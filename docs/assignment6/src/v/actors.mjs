@@ -103,6 +103,13 @@ createFormEl["commit"].addEventListener("click", function () {
     if (createFormEl.checkValidity()) Actor.add( slots);
 });
 
+createFormEl.personId.addEventListener("change", function () {
+    const persId = createFormEl.personId.value;
+    if (persId in Person.instances) {
+        createFormEl.name.value = Person.instances[persId].name;
+    }
+});
+
 /**********************************************
  * Use case Update Actor
  **********************************************/
@@ -140,12 +147,13 @@ updateFormEl["commit"].addEventListener("click", function () {
         agent: selectUpdateAgentEl.value
     }
     // save the input data only if all of the form fields are valid
-    createFormEl.name.setCustomValidity(
+    updateFormEl.name.setCustomValidity(
         Person.checkName(slots.name).message
     );
 
     if (updSelActorEl.checkValidity()) {
         Actor.update( slots);
+
         // update the actor selection list's option element
         updSelActorEl.options[updSelActorEl.selectedIndex].text = slots.name;
     }
