@@ -12,13 +12,13 @@ import Actor from "../m/Actor.mjs";
 import Person from "../m/Person.mjs";
 import { fillSelectWithOptions } from "../../lib/util.mjs";
 import Director from "../m/Director.mjs";
+import Movie from "../../../assignment5/src/m/Movie.mjs";
+import {createMultipleChoiceWidget} from "../../../assignment5/lib/util.mjs";
 
 /***************************************************************
  Load data
  ***************************************************************/
-//With Actor create doesn't work correctly and for Person - update
 Person.retrieveAll();
-//Actor.retrieveAll();
 
 /***************************************************************
  Set up general, use-case-independent UI elements
@@ -90,11 +90,13 @@ createFormEl.name.addEventListener("input", function () {
 createFormEl["commit"].addEventListener("click", function () {
     const slots = {
         personId: createFormEl.personId.value,
-        name: createFormEl.name.value
+        name: createFormEl.name.value,
+        agent: selectCreateAgentEl.value
     };
+
     // check all input fields and show error messages
     createFormEl.personId.setCustomValidity(
-        Person.checkPersonIdAsId( slots.personId).message, Actor);
+        Person.checkPersonIdAsId( createFormEl.personId.value, Actor).message);
     createFormEl.name.setCustomValidity(
         Person.checkName(slots.name).message
     );
@@ -119,7 +121,13 @@ document.getElementById("Update").addEventListener("click", function () {
     document.getElementById("Actor-U").style.display = "block";
     updateFormEl.reset();
 });
-// handle change events on employee select element
+
+createFormEl.name.addEventListener("input", function () {
+    createFormEl.name.setCustomValidity(
+        Person.checkName( createFormEl.name.value).message);
+});
+
+// handle change events on actor select element
 updSelActorEl.addEventListener("change", handleActorSelectChangeEvent);
 
 // handle Save button click events
@@ -128,13 +136,9 @@ updateFormEl["commit"].addEventListener("click", function () {
     if (!actorIdRef) return;
     const slots = {
         personId: updateFormEl.personId.value,
-        name: updateFormEl.name.value
+        name: updateFormEl.name.value,
+        agent: selectUpdateAgentEl.value
     }
-    // check all property constraints
-    updateFormEl.name.addEventListener("input", function () {
-        updateFormEl.name.setCustomValidity(
-            Person.checkName( updateFormEl.name.value).message);
-    });
     // save the input data only if all of the form fields are valid
     createFormEl.name.setCustomValidity(
         Person.checkName(slots.name).message
@@ -151,14 +155,22 @@ updateFormEl["commit"].addEventListener("click", function () {
  * when a actor is selected, populate the form with the data of the selected actor
  */
 function handleActorSelectChangeEvent() {
+    const updateFormEl = document.querySelector("section#Actor-U > form"),
+        saveButton = updateFormEl.commit,
+        selectUpdateAgentEl = updateFormEl.selectAgent;
     const key = updSelActorEl.value;
-    if (key) {
-        const auth = Actor.instances[key];
-        updateFormEl.personId.value = auth.personId;
-        updateFormEl.name.value = auth.name;
-        updateFormEl.agent.value = auth.agent;
+    if(key) {
+        const actor = Actor.instances[key];
+        updateFormEl.personId.value = actor.personId;
+        updateFormEl.name.value = actor.name;
+        fillSelectWithOptions(selectUpdateAgentEl, Person.instances, "name");
+        if (actor.agent) {
+            updateFormEl.selectAgent.value = actor.agent;
+        }
+        saveButton.disabled = false;
     } else {
         updateFormEl.reset();
+        saveButton.disabled = true;
     }
 }
 

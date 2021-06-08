@@ -73,7 +73,7 @@ document.getElementById("create")
 // set up event handlers for responsive constraint validation
 createFormEl.personId.addEventListener("input", function () {
   createFormEl.personId.setCustomValidity(
-      Person.checkPersonIdAsId( createFormEl.personId.value).message);
+      Person.checkPersonIdAsId( createFormEl.personId.value, Actor).message);
 });
 createFormEl.name.addEventListener("input", function () {
     createFormEl.name.setCustomValidity(
@@ -88,7 +88,7 @@ createFormEl["commit"].addEventListener("click", function () {
   };
   // check all input fields and show error messages
   createFormEl.personId.setCustomValidity(
-      Person.checkPersonIdAsId( slots.personId).message);
+      Person.checkPersonIdAsId( slots.personId, Actor).message);
   createFormEl.name.setCustomValidity(
       Person.checkName( slots.name).message);
   // save the input data only if all form fields are valid

@@ -41,22 +41,22 @@ class Person {
    Checks ID uniqueness constraint against the direct type of a Person object
    */
   static checkPersonIdAsId( id, DirectType) {
-    if (!DirectType) DirectType = Person; //default
+    if (!DirectType) DirectType = Person;  // default
     id = parseInt( id);
     if (isNaN(id)) {
       return new MandatoryValueConstraintViolation(
           "A positive integer value for the person ID is required!");
     }
-    let constraintViolation = Person.checkPersonId();
-    if ((constraintViolation instanceof NoConstraintViolation)) {
+    let validationResult = Person.checkPersonId( id);
+    if ((validationResult instanceof NoConstraintViolation)) {
       if (DirectType.instances[id]) {
-        constraintViolation = new UniquenessConstraintViolation(
+        validationResult = new UniquenessConstraintViolation(
             `There is already a ${DirectType.name} record with this person ID!`);
       } else {
-        constraintViolation = new NoConstraintViolation();
+        validationResult = new NoConstraintViolation();
       }
     }
-    return constraintViolation;
+    return validationResult;
   }
   static checkPersonIdAsIdRef( id) {
     let constraintViolation = Person.checkPersonId( id);
