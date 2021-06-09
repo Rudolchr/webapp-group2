@@ -1,6 +1,6 @@
 import Movie from "./Movie.mjs";
 
-class TvSeriesEpisode extends Movie{
+class Biography extends Movie{
   constructor ({movieId, title, releaseDate, actors,directorId, actorsIdRefs}, about){
     super({movieId, title, releaseDate, actors, directorId,actorsIdRefs})
     this.about = about;
@@ -44,3 +44,5 @@ class TvSeriesEpisode extends Movie{
     }
   }
 }
+
+export default Biography;

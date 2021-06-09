@@ -61,6 +61,9 @@ class Person {
   static checkPersonIdAsIdRef( id) {
     let constraintViolation = Person.checkPersonId( id);
     if ((constraintViolation instanceof NoConstraintViolation) && id) {
+      console.log("checkId");
+      console.log(id);
+      console.log(Person.instances);
       if (!Person.instances[String(id)]) {
         constraintViolation = new ReferentialIntegrityConstraintViolation(
             "There is no person record with this person ID!");

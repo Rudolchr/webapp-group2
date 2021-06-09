@@ -6,6 +6,8 @@
  Import classes, datatypes and utility procedures
  ***************************************************************/
 import Person from "../m/Person.mjs";
+import Actor from "../m/Actor.mjs";
+import Director from "../m/Director.mjs";
 import Movie from "../m/Movie.mjs";
 import { fillSelectWithOptions, createListFromMap, createMultipleChoiceWidget }
     from "../../lib/util.mjs";
@@ -72,9 +74,23 @@ const createFormEl = document.querySelector("section#Movie-C > form"),
   document.getElementById("Movie-M").style.display = "none";
   document.getElementById("Movie-C").style.display = "block";
   // set up a single selection list for selecting a director
-  fillSelectWithOptions( selectDirectorEl, Person.instances, "name");
+  //console.log(Person.instances);
+  let directors = {};
+  let actors = {};
+  for(const perid in Person.instances){
+    if(Person.instances[perid] instanceof Director){
+      console.log(perid + " is an Director");
+      directors[perid] = Person.instances[perid];
+    } else if(Person.instances[perid] instanceof Actor){
+      console.log(perid + " is an Actor");
+      actors[perid] = Person.instances[perid];
+    }
+  }
+  console.log(directors);
+  console.log(actors);
+  fillSelectWithOptions( selectDirectorEl, directors /*Person.instances*/, "name");
   // set up a multiple selection list for selecting actors
-  fillSelectWithOptions( selectActorsEl, Person.instances,
+  fillSelectWithOptions( selectActorsEl, actors/*Person.instances*/,
     "personId", {displayProp: "name"});
   createFormEl.reset();
 });

@@ -52,3 +52,5 @@ class TvSeriesEpisode extends Movie{
     return new NoConstraintViolation();
   }
 }
+
+export default TvSeriesEpisode;

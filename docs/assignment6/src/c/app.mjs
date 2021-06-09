@@ -6,6 +6,8 @@ import Person from "../m/Person.mjs";
 import Actor from "../m/Actor.mjs";
 import Director from "../m/Director.mjs";
 import Movie from "../m/Movie.mjs";
+import TvSeriesEpisode from "../m/TvSeriesEpisode.mjs";
+import Biography from "../m/Biography.mjs";
 
 /*******************************************
  *** Auxiliary methods for testing **********
@@ -97,11 +99,9 @@ function generateTestData() {
       name: "Marc Forster"
     });
 
-
     Actor.saveAll();
     Director.saveAll();
 
-    /*
     Movie.instances["1"] = new Movie({
       movieId: 1,
       title: "Pulp Fiction",
@@ -123,7 +123,7 @@ function generateTestData() {
       directorId : 1,
       actorsIdRefs: [9,5]
     });
-    Movie.saveAll(); */
+    Movie.saveAll();
   } catch (e) {
     console.log( `${e.constructor.name}: ${e.message}`);
   }

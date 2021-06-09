@@ -5,6 +5,8 @@
  * @author Gerd Wagner
  */
 import Person from "./Person.mjs";
+import Actor from "./Actor.mjs";
+import Director from "./Director.mjs";
 import {cloneObject, isIntegerOrIntegerString, isNonEmptyString} from "../../lib/util.mjs";
 import {NoConstraintViolation, MandatoryValueConstraintViolation,
   RangeConstraintViolation, PatternConstraintViolation, UniquenessConstraintViolation,
@@ -209,37 +211,46 @@ class Movie {
     return this._directorId;
   }
   set directorId(d){
+    console.log("setDirector");
+    console.log(d);
+    console.log(Director.instances);
     const validationResult = Movie.checkDirector(d);
     if(validationResult instanceof NoConstraintViolation){
       if(typeof(d) === "number"){
-        this._directorId = Person.instances[String(d)];
+        console.log("hier");
+        this._directorId = Director.instances[String(d)];
       } else {
-        this._directorId = Person.instances[String(d.personId)];
+        console.log("da");
+        this._directorId = Director.instances[String(d.personId)];
       }
-      delete this._directorId._directedMovies[this.movieId];
-      this._directorId._directedMovies[this.movieId] = this;
+      //delete this._directorId._directedMovies[this.movieId];
+      //this._directorId._directedMovies[this.movieId] = this;
     } else{
       throw validationResult;
     }
   }
   static checkDirector(d){
+    console.log(typeof(d));
     if(!d){
       // is given
       return new MandatoryValueConstraintViolation("A Director must be provided!");
     } else if(typeof(d) === "object"){
-      if(!Person.instances[String(d.personId)]){
+    //} else if(d instanceof Person){
+      if(!Director.instances[String(d.personId)]){
         // Person does not exist
         return new ReferentialIntegrityConstraintViolation("There is no Person with ID " + d);
       } else{
         return new NoConstraintViolation();
       }
     } else if(typeof(d) === "number"){
-      if(!Person.instances[String(d)]){
+      if(!Director.instances[String(d)]){
         // Person does not exist
         return new ReferentialIntegrityConstraintViolation("Could not find this Person");
       } else{
         return new NoConstraintViolation();
       }
+    } else {
+      return new RangeConstraintViolation("Expected number or Directorobject");
     }
   }
   get actors() {
@@ -252,20 +263,21 @@ class Movie {
       validationResult = new NoConstraintViolation();
     } else {
       // invoke foreign key constraint check
-      validationResult = Person.checkPersonIdAsIdRef( actor_id);
+      validationResult = Actor.checkActorIdAsIdRef( actor_id);
     }
     return validationResult;
   }
   addActor( a) {
+    console.log("addActor");
     // a can be an ID reference or an object reference
     const actor_id = (typeof a !== "object") ? parseInt( a) : a.actorId;
     const validationResult = Movie.checkActor( actor_id);
     if (actor_id && validationResult instanceof NoConstraintViolation) {
       // add the new actor reference
       const key = String( actor_id);
-      this._actors[key] = Person.instances[key];
+      this._actors[key] = Actor.instances[key];
       // automatically add the derived inverse reference
-      this._actors[key]._playedMovies[this._movieId] = this;
+      //this._actors[key]._playedMovies[this._movieId] = this;
     } else {
       throw validationResult;
     }
@@ -276,7 +288,7 @@ class Movie {
     const validationResult = Movie.checkActor( actor_id);
     if (validationResult instanceof NoConstraintViolation) {
       const key = String( actor_id);
-      delete this._actors[key]._playedMovies[this._movieId];
+      //delete this._actors[key]._playedMovies[this._movieId];
       // delete the actor reference
       delete this._actors[key];
     } else {
@@ -284,6 +296,7 @@ class Movie {
     }
   }
   set actors( a) {
+    console.log("setActors");
     this._actors = {};
     if (Array.isArray(a)) {  // array of IdRefs
       for (const idRef of a) {
@@ -378,6 +391,8 @@ Movie.update = function ({movieId, title, releaseDate,
       }
     }
     if (actorIdRefsToRemove) {
+      console.log("remove");
+      console.log(actorIdRefsToRemove);
       updatedProperties.push("actors(removed)");
       for (let actor_id of actorIdRefsToRemove) {
         movie.removeActor( actor_id);
@@ -431,6 +446,8 @@ Movie.retrieveAll = function () {
   for (let movieId of Object.keys( movies)) {
 
     try {
+      console.log("retrieve");
+      console.log(movies[movieId]);
       Movie.instances[movieId] = new Movie( movies[movieId]);
     } catch (e) {
       console.log( `${e.constructor.name} while deserializing movie ${movieId}: ${e.message}`);
