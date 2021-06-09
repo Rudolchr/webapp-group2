@@ -21,15 +21,24 @@ class Movie {
   // using a record parameter with ES6 function parameter destructuring
   constructor ({movieId, title, releaseDate, actors,directorId,actorsIdRefs}) {
     this.movieId = movieId;
+    console.log("id set");
     this.title = title;
+    console.log("title set");
     this.releaseDate = releaseDate;
+    console.log("date set");
     this.directorId = directorId;
+    console.log("director set");
     // assign object references or ID references (to be converted in setter)
     if (actors || actorsIdRefs){
+      console.log("patrh1");
+      console.log(actors || actorsIdRefs);
       this.actors = actors || actorsIdRefs;
+      console.log("me here");
     } else {
+      console.log("patrh2");
       this.actors = [];
     }
+    console.log("done in Movie");
   }
   get movieId() {
     return this._movieId;
@@ -268,10 +277,18 @@ class Movie {
     return validationResult;
   }
   addActor( a) {
-    console.log("addActor");
+    console.log(a.personId);
+    if(a instanceof Actor){
+      console.log("Actor");
+    } else if(a instanceof Director){
+      console.log("Director");
+    } else{
+      console.log("Person");
+    }
     // a can be an ID reference or an object reference
-    const actor_id = (typeof a !== "object") ? parseInt( a) : a.actorId;
+    const actor_id = (typeof a !== "object") ? parseInt( a) : a.personId;
     const validationResult = Movie.checkActor( actor_id);
+    console.log("addActor " + actor_id);
     if (actor_id && validationResult instanceof NoConstraintViolation) {
       // add the new actor reference
       const key = String( actor_id);
@@ -284,7 +301,7 @@ class Movie {
   }
   removeActor( a) {
     // a can be an ID reference or an object reference
-    const actor_id = (typeof a !== "object") ? parseInt( a) : a.actorId;
+    const actor_id = (typeof a !== "object") ? parseInt( a) : a.personId; // was .actorId
     const validationResult = Movie.checkActor( actor_id);
     if (validationResult instanceof NoConstraintViolation) {
       const key = String( actor_id);
@@ -299,11 +316,14 @@ class Movie {
     console.log("setActors");
     this._actors = {};
     if (Array.isArray(a)) {  // array of IdRefs
+      console.log("ref");
       for (const idRef of a) {
         this.addActor( idRef);
       }
     } else {  // map of IdRefs to object references
+      console.log("map");
       for (const idRef of Object.keys( a)) {
+        console.log(a[idRef]);
         this.addActor( a[idRef]);
       }
     }

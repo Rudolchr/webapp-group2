@@ -9,6 +9,8 @@ import Person from "../m/Person.mjs";
 import Actor from "../m/Actor.mjs";
 import Director from "../m/Director.mjs";
 import Movie from "../m/Movie.mjs";
+import TvSeriesEpisode from "../m/TvSeriesEpisode.mjs";
+import Biography from "../m/Biography.mjs";
 import { fillSelectWithOptions, createListFromMap, createMultipleChoiceWidget }
     from "../../lib/util.mjs";
 
@@ -17,6 +19,30 @@ import { fillSelectWithOptions, createListFromMap, createMultipleChoiceWidget }
  ***************************************************************/
 Person.retrieveAll();
 Movie.retrieveAll();
+TvSeriesEpisode.retrieveAll();
+Biography.retrieveAll();
+
+/***************************************************************
+Helper Functions
+***************************************************************/
+
+/**
+ * Collect all movies from all subtypes
+ * @param {objects} types Classes to collect
+ * @return {Movies}
+ */
+function collectMovies(types){
+  let ret = {};
+  console.log(types);
+  for(const t in types){
+    console.log(t);
+    for(const key in types[t].instances){
+      ret[key] = types[t].instances[key];
+    }
+  }
+  console.log(ret);
+  return ret;
+}
 
 /***************************************************************
  Set up general, use-case-independent UI elements
@@ -45,8 +71,14 @@ document.getElementById("retrieveAndListAll")
     document.getElementById("Movie-R").style.display = "block";
     const tableBodyEl = document.querySelector("section#Movie-R>table>tbody");
     tableBodyEl.innerHTML = "";  // drop old content
-    for (const key of Object.keys( Movie.instances)) {
-      const movie = Movie.instances[key];
+    let movieTypes = [Movie, Biography, TvSeriesEpisode];
+
+    let allMovies = collectMovies(movieTypes);
+    console.log("mov");
+    console.log(allMovies);
+
+    for (const key of Object.keys( allMovies/*Movie.instances*/)) {
+      const movie = allMovies[key];/*Movie.instances[key];*/
       const date = new Date(movie.releaseDate);
       let dateStr = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
 
@@ -61,6 +93,35 @@ document.getElementById("retrieveAndListAll")
         const authListEl = createListFromMap(movie.actors, "name");
         row.insertCell().appendChild( authListEl);
       }
+      // Category
+      if(allMovies[key] instanceof TvSeriesEpisode){
+        row.insertCell().textContent = "TV Series";
+      } else if(allMovies[key] instanceof Biography){
+        row.insertCell().textContent = "Biography";
+      } else{
+        row.insertCell().textContent = "";
+      }
+
+      // Series Name
+      if(allMovies[key] instanceof TvSeriesEpisode){
+        row.insertCell().textContent = allMovies[key].tvSeriesName;
+      } else{
+        row.insertCell().textContent = "";
+      }
+
+      // Series Number
+      if(allMovies[key] instanceof TvSeriesEpisode){
+        row.insertCell().textContent = allMovies[key].episodeNo;
+      } else{
+        row.insertCell().textContent = "";
+      }
+
+      // About
+      if(allMovies[key] instanceof Biography){
+        row.insertCell().textContent = allMovies[key].about.name;
+      } else{
+        row.insertCell().textContent = "";
+      }
     }
   });
 
@@ -69,29 +130,20 @@ document.getElementById("retrieveAndListAll")
  **********************************************/
 const createFormEl = document.querySelector("section#Movie-C > form"),
       selectActorsEl = createFormEl.selectActors,
-      selectDirectorEl = createFormEl.selectDirector;
+      selectDirectorEl = createFormEl.selectDirector,
+      category = createFormEl.category;
+      console.log(createFormEl);
+      console.log(["TV Series","Biography"]);
   document.getElementById("create").addEventListener("click", function () {
   document.getElementById("Movie-M").style.display = "none";
   document.getElementById("Movie-C").style.display = "block";
   // set up a single selection list for selecting a director
   //console.log(Person.instances);
-  let directors = {};
-  let actors = {};
-  for(const perid in Person.instances){
-    if(Person.instances[perid] instanceof Director){
-      console.log(perid + " is an Director");
-      directors[perid] = Person.instances[perid];
-    } else if(Person.instances[perid] instanceof Actor){
-      console.log(perid + " is an Actor");
-      actors[perid] = Person.instances[perid];
-    }
-  }
-  console.log(directors);
-  console.log(actors);
-  fillSelectWithOptions( selectDirectorEl, directors /*Person.instances*/, "name");
+  fillSelectWithOptions( selectDirectorEl, Director.instances /*Person.instances*/, "name");
   // set up a multiple selection list for selecting actors
-  fillSelectWithOptions( selectActorsEl, actors/*Person.instances*/,
+  fillSelectWithOptions( selectActorsEl, Actor.instances/*Person.instances*/,
     "personId", {displayProp: "name"});
+  fillSelectWithOptions(category, [{name:"TV Series"}, {name:"Biography"}], "name");
   createFormEl.reset();
 });
 // set up event handlers for responsive constraint validation
@@ -108,6 +160,19 @@ createFormEl.title.addEventListener("input", function () {
       Movie.checkTitle( createFormEl.title.value).message);
 });
 
+createFormEl.seriesName.addEventListener("input", function () {
+  createFormEl.seriesName.setCustomValidity(
+      TvSeriesEpisode.checkTvSeriesName( createFormEl.seriesName.value).message);
+});
+createFormEl.episodeNo.addEventListener("input", function () {
+  createFormEl.episodeNo.setCustomValidity(
+      TvSeriesEpisode.checkEpisodeNo( createFormEl.episodeNo.value).message);
+});
+createFormEl.about.addEventListener("input", function () {
+  createFormEl.about.setCustomValidity(
+      Biography.checkAbout( createFormEl.about.value).message);
+});
+
 // handle Save button click events
 createFormEl["commit"].addEventListener("click", function () {
   let dir = -1;
@@ -116,6 +181,7 @@ createFormEl["commit"].addEventListener("click", function () {
       dir = parseInt(id);
     }
   }
+
   const slots = {
     movieId: createFormEl.movieId.value,
     title: createFormEl.title.value,
@@ -123,6 +189,25 @@ createFormEl["commit"].addEventListener("click", function () {
     directorId: dir,
     actorsIdRefs: []
   };
+
+  if(createFormEl.category.value === "TV Series"){
+    console.log("serie");
+    slots.tvSeriesName = createFormEl.seriesName.value;
+    slots.episodeNo = createFormEl.episodeNo.value;
+
+    createFormEl.seriesName.setCustomValidity(
+      TvSeriesEpisode.checkTvSeriesName( slots.tvSeriesName).message);
+    createFormEl.episodeNo.setCustomValidity(
+      TvSeriesEpisode.checkEpisodeNo(slots.episodeNo).message
+    );
+  } else if(createFormEl.category.value === "Biography"){
+    console.log("biography");
+    slots.about = createFormEl.about.value;
+
+    createFormEl.about.setCustomValidity(
+      Biography.checkAbout( slots.about).message);
+  }
+
   // check all input fields and show error messages
   createFormEl.movieId.setCustomValidity(
     Movie.checkMovieIdAsId( slots.movieId).message);
@@ -135,6 +220,7 @@ createFormEl["commit"].addEventListener("click", function () {
   selectDirectorEl.setCustomValidity(
     Movie.checkDirector(slots.directorId).message
   );
+
   // get the list of selected actors
   const selActOptions = createFormEl.selectActors.selectedOptions;
   // save the input data only if all form fields are valid
@@ -143,7 +229,16 @@ createFormEl["commit"].addEventListener("click", function () {
     for (const opt of selActOptions) {
       slots.actorsIdRefs.push( opt.value);
     }
-    Movie.add( slots);
+    if(createFormEl.category.value === "TV Series"){
+      console.log(slots);
+      TvSeriesEpisode.add(slots);
+    } else if(createFormEl.category.value === "Biography"){
+      console.log(slots);
+      Biography.add(slots);
+    } else {
+      console.log(slots);
+      Movie.add( slots);
+    }
   }
 });
 
@@ -156,7 +251,7 @@ const updateFormEl = document.querySelector("section#Movie-U > form"),
     document.getElementById("Movie-M").style.display = "none";
     document.getElementById("Movie-U").style.display = "block";
     // set up the movie selection list
-    fillSelectWithOptions( selectUpdateMovieEl, Movie.instances,
+    fillSelectWithOptions( selectUpdateMovieEl, collectMovies({Movie, Biography, TvSeriesEpisode})/*Movie.instances*/,
       "movieId", {displayProp: "title"});
     updateFormEl.reset();
 });
@@ -174,6 +269,19 @@ updateFormEl.title.addEventListener("input", function () {
       Movie.checkTitle( updateFormEl.title.value).message);
 });
 
+updateFormEl.seriesName.addEventListener("input", function () {
+  updateFormEl.seriesName.setCustomValidity(
+      TvSeriesEpisode.checkTvSeriesName( updateFormEl.seriesName.value).message);
+});
+updateFormEl.episodeNo.addEventListener("input", function () {
+  updateFormEl.episodeNo.setCustomValidity(
+      TvSeriesEpisode.checkEpisodeNo( updateFormEl.episodeNo.value).message);
+});
+updateFormEl.about.addEventListener("input", function () {
+  updateFormEl.about.setCustomValidity(
+      Biography.checkAbout( updateFormEl.about.value).message);
+});
+
 /**
  * handle movie selection events: when a movie is selected,
  * populate the form with the data of the selected movie
@@ -183,9 +291,10 @@ selectUpdateMovieEl.addEventListener("change", function () {
     saveButton = formEl.commit,
     selectActorsWidget = formEl.querySelector(".MultiChoiceWidget"),
     selectDirectorEl = formEl.selectDirector,
-    movieId = formEl.selectMovie.value;
+    movieId = formEl.selectMovie.value,
+    category = formEl.category;
   if (movieId) {
-    const movie = Movie.instances[movieId];
+    const movie = collectMovies({Movie, Biography, TvSeriesEpisode})[movieId];//Movie.instances[movieId];
     const tmpDat = new Date(movie.releaseDate);
     const relDat = tmpDat.getFullYear() + "-" +
       (tmpDat.getMonth() + 1) + "-" +
@@ -194,17 +303,32 @@ selectUpdateMovieEl.addEventListener("change", function () {
     formEl.movieId.value = movie.movieId;
     formEl.title.value = movie.title;
     formEl.releaseDate.value = relDat;
+
     // set up the associated director selection list
-    fillSelectWithOptions( selectDirectorEl, Person.instances, "name");
+    fillSelectWithOptions( selectDirectorEl, Director.instances/*Person.instances*/, "name");
+
+    // set up Category
+    fillSelectWithOptions(category, [{name:"TV Series"}, {name:"Biography"}], "name");
+
     // set up the associated actors selection widget
     if(typeof(movie.actors) !== 'undefined'){
       createMultipleChoiceWidget( selectActorsWidget, movie.actors,
-          Person.instances, "personId", "name", 1);  // minCard=1
+          Actor.instances/*Person.instances*/, "personId", "name", 1);  // minCard=1
     } else{
       createMultipleChoiceWidget( selectActorsWidget, [],
-          Person.instances, "personId", "name", 1);
+          Actor.instances/*Person.instances*/, "personId", "name", 1);
     }
     formEl.selectDirector.value = movie.directorId.name;
+
+    if(movie instanceof TvSeriesEpisode){
+      formEl.category.value = "TV Series";
+      formEl.seriesName.value = movie.tvSeriesName;
+      formEl.episodeNo.value = movie.episodeNo;
+    } else if(movie instanceof Biography){
+      formEl.category.value = "Biography";
+      formEl.about.value = movie.about.personId;
+    }
+
     saveButton.disabled = false;
   } else {
     formEl.reset();
@@ -244,6 +368,25 @@ updateFormEl["commit"].addEventListener("click", function () {
     Movie.checkDirector(slots.directorId).message
   );
 
+  if(updateFormEl.category.value === "TV Series"){
+    slots.tvSeriesName = updateFormEl.seriesName.value;
+    slots.episodeNo = updateFormEl.episodeNo.value;
+
+    updateFormEl.seriesName.setCustomValidity(
+      TvSeriesEpisode.checkTvSeriesName(slots.tvSeriesName).message
+    );
+    updateFormEl.episodeNo.setCustomValidity(
+      TvSeriesEpisode.checkEpisodeNo(slots.episodeNo).message
+    );
+  } else if(updateFormEl.category.value === "Biography"){
+    slots.about = updateFormEl.about.value;
+
+    updateFormEl.about.setCustomValidity(
+      Biography.checkAbout(slots.about).message
+    );
+  }
+
+
   // commit the update only if all form field values are valid
   if (updateFormEl.checkValidity()) {
     // construct actorIdRefs-ToAdd/ToRemove lists from the association list
@@ -263,7 +406,14 @@ updateFormEl["commit"].addEventListener("click", function () {
     if (actorIdRefsToAdd.length > 0) {
       slots.actorIdRefsToAdd = actorIdRefsToAdd;
     }
-    Movie.update( slots);
+
+    if(updateFormEl.category.value === "TV Series"){
+      TvSeriesEpisode.update(slots);
+    } else if (updateFormEl.category.value === "Biography"){
+      Biography.update(slots);
+    } else{
+      Movie.update( slots);
+    }
     // update the movie selection list's option element
     selectUpdateMovieEl.options[selectUpdateMovieEl.selectedIndex].text = slots.title;
     selectActorsWidget.innerHTML = "";

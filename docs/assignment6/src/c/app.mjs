@@ -123,7 +123,36 @@ function generateTestData() {
       directorId : 1,
       actorsIdRefs: [9,5]
     });
+    Movie.instances["6"] = new Movie({
+      movieId: 6,
+      title: "Stay",
+      releaseDate: new Date("2005-9-24"),
+      directorId : 15,
+      actorsIdRefs: [7,12]
+    });
     Movie.saveAll();
+    TvSeriesEpisode.instances["4"] = new TvSeriesEpisode({
+      movieId: 4,
+      title: "2015",
+      releaseDate: new Date("2019-6-30"),
+      directorId : 1,
+      actorsIdRefs: [10,11,12],
+      tvSeriesName: "The Loudest Voice",
+      episodeNo: 8
+    }
+    );
+
+    TvSeriesEpisode.saveAll();
+
+    Biography.instances["5"] = new Biography({
+      movieId: 5,
+      title: "A Beautiful Mind",
+      releaseDate: new Date("2001-12-21"),
+      directorId : 10,
+      actorsIdRefs: [10,14],
+      about: 16
+    });
+    Biography.saveAll();
   } catch (e) {
     console.log( `${e.constructor.name}: ${e.message}`);
   }

@@ -112,8 +112,9 @@ class Person {
     return rec;
   }
   toString() {
-    let movieStr = `Person{ PersonID: ${this._personId}, name: ${this._name}, directed movies:
-    ${Object.keys( this._directedMovies).join(",")}, played movies: ${Object.keys( this._playedMovies).join(",")}`;
+    //let movieStr = `Person{ PersonID: ${this._personId}, name: ${this._name}, directed movies:
+    //${Object.keys( this._directedMovies).join(",")}, played movies: ${Object.keys( this._playedMovies).join(",")}`;
+    let movieStr = `Person{ PersonID: ${this._personId}, name: ${this._name}`;
     return `${movieStr}`;
   }
 }
