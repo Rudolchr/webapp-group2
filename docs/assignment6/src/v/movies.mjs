@@ -33,14 +33,12 @@ Helper Functions
  */
 function collectMovies(types){
   let ret = {};
-  console.log(types);
   for(const t in types){
-    console.log(t);
     for(const key in types[t].instances){
       ret[key] = types[t].instances[key];
     }
   }
-  console.log(ret);
+
   return ret;
 }
 
@@ -74,8 +72,6 @@ document.getElementById("retrieveAndListAll")
     let movieTypes = [Movie, Biography, TvSeriesEpisode];
 
     let allMovies = collectMovies(movieTypes);
-    console.log("mov");
-    console.log(allMovies);
 
     for (const key of Object.keys( allMovies/*Movie.instances*/)) {
       const movie = allMovies[key];/*Movie.instances[key];*/
@@ -132,13 +128,10 @@ const createFormEl = document.querySelector("section#Movie-C > form"),
       selectActorsEl = createFormEl.selectActors,
       selectDirectorEl = createFormEl.selectDirector,
       category = createFormEl.category;
-      console.log(createFormEl);
-      console.log(["TV Series","Biography"]);
   document.getElementById("create").addEventListener("click", function () {
   document.getElementById("Movie-M").style.display = "none";
   document.getElementById("Movie-C").style.display = "block";
   // set up a single selection list for selecting a director
-  //console.log(Person.instances);
   fillSelectWithOptions( selectDirectorEl, Director.instances /*Person.instances*/, "name");
   // set up a multiple selection list for selecting actors
   fillSelectWithOptions( selectActorsEl, Actor.instances/*Person.instances*/,
@@ -191,7 +184,6 @@ createFormEl["commit"].addEventListener("click", function () {
   };
 
   if(createFormEl.category.value === "TV Series"){
-    console.log("serie");
     slots.tvSeriesName = createFormEl.seriesName.value;
     slots.episodeNo = createFormEl.episodeNo.value;
 
@@ -201,7 +193,6 @@ createFormEl["commit"].addEventListener("click", function () {
       TvSeriesEpisode.checkEpisodeNo(slots.episodeNo).message
     );
   } else if(createFormEl.category.value === "Biography"){
-    console.log("biography");
     slots.about = createFormEl.about.value;
 
     createFormEl.about.setCustomValidity(
@@ -230,13 +221,10 @@ createFormEl["commit"].addEventListener("click", function () {
       slots.actorsIdRefs.push( opt.value);
     }
     if(createFormEl.category.value === "TV Series"){
-      console.log(slots);
       TvSeriesEpisode.add(slots);
     } else if(createFormEl.category.value === "Biography"){
-      console.log(slots);
       Biography.add(slots);
     } else {
-      console.log(slots);
       Movie.add( slots);
     }
   }

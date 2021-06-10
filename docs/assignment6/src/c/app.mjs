@@ -164,9 +164,20 @@ function clearData() {
   if (confirm( "Do you really want to delete the entire database?")) {
     try {
       Person.instances = {};
-      localStorage["people"] = "{}";
+      Movie.heap = {};
       Movie.instances = {};
+      Biography.instances = {};
+      TvSeriesEpisode.instances = {};
+      Actor.instances = {};
+      Director.instances = {};
+
+      localStorage["people"] = "{}";
       localStorage["movies"] = "{}";
+      localStorage["tvSeriesEpisode"] = "{}";
+      localStorage["biography"] = "{}";
+      localStorage["actors"] = "{}";
+      localStorage["directors"] = "{}";
+
       console.log("All data cleared.");
     } catch (e) {
       console.log( `${e.constructor.name}: ${e.message}`);

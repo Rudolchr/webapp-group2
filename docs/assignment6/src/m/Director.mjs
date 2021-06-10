@@ -66,9 +66,6 @@ Director.add = function (slots) {
  * @param {{personId: string, name: stringr}} slots - A record of parameters.
  */
 Director.update = function ({personId, name}) {
-    console.log("Jestem w reżyserze");
-    console.log(personId);
-    console.log(name);
     const emp = Director.instances[personId],
         objectBeforeUpdate = cloneObject( emp);
     let noConstraintViolated = true, updatedProperties = [];

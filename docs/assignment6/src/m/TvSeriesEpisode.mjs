@@ -1,4 +1,5 @@
 import Movie from "./Movie.mjs";
+import Biography from "./Biography.mjs";
 import {isNonEmptyString, isIntegerOrIntegerString, cloneObject} from "../../lib/util.mjs";
 import {NoConstraintViolation, MandatoryValueConstraintViolation,
   RangeConstraintViolation, PatternConstraintViolation, UniquenessConstraintViolation,
@@ -27,8 +28,6 @@ class TvSeriesEpisode extends Movie{
   }
 
   static checkTvSeriesName(tvsn){
-    console.log(tvsn);
-    console.log(isNonEmptyString(tvsn));
     if(!tvsn || !isNonEmptyString(tvsn)){
       return new MandatoryValueConstraintViolation("A Series name must be provided!");
     }
@@ -60,6 +59,18 @@ class TvSeriesEpisode extends Movie{
 }
 
 TvSeriesEpisode.instances = {};
+Movie.subtypes.push(TvSeriesEpisode);
+
+function mergeMovies(list){
+  let ret = {};
+  for(const i in list){
+    for(const j in list[i].instances){
+      ret[j] = list[i].instances[j];
+    }
+  }
+
+  return ret;
+}
 
 /**
  *  Create a new movie record/object
@@ -74,20 +85,25 @@ TvSeriesEpisode.add = function (slots) {
   }
   if (movie) {
     TvSeriesEpisode.instances[movie.movieId] = movie;
+    Movie.heap[movie.movieId] = movie;
     console.log( `${movie.toString()} created!`);
   }
 };
+
 /**
  *  Update an existing Movie record/object
  *  properties are updated with implicit setters for making sure
  *  that the new values are validated
  */
 TvSeriesEpisode.update = function ({movieId, title, releaseDate,
-    actorIdRefsToAdd, actorIdRefsToRemove, directorId}){
-  const movie = TvSeriesEpisode.instances[movieId],
+    actorIdRefsToAdd, actorIdRefsToRemove, directorId, tvSeriesName, episodeNo}){
+  const movie = Movie.heap[movieId],//mergeMovies({Biography, Movie, TvSeriesEpisode})[movieId],//TvSeriesEpisode.instances[movieId],
       objectBeforeUpdate = cloneObject( movie);  // save the current state of movie
   var noConstraintViolated = true, updatedProperties = [];
   try {
+    let seriesName = tvSeriesName;
+    let episode = episodeNo;
+
     if (title && movie.title !== title) {
       movie.title = title;
       updatedProperties.push("title");
@@ -103,8 +119,6 @@ TvSeriesEpisode.update = function ({movieId, title, releaseDate,
       }
     }
     if (actorIdRefsToRemove) {
-      console.log("remove");
-      console.log(actorIdRefsToRemove);
       updatedProperties.push("actors(removed)");
       for (let actor_id of actorIdRefsToRemove) {
         movie.removeActor( actor_id);
@@ -113,6 +127,36 @@ TvSeriesEpisode.update = function ({movieId, title, releaseDate,
     if(movie.directorId && movie.directorId.name !== directorId) {
       movie.directorId = directorId;
       updatedProperties.push("directorId");
+    }
+
+    if(movie instanceof TvSeriesEpisode){
+      if(seriesName && movie.seriesName !== seriesName){
+        movie.tvSeriesName = seriesName;
+      }
+      if(episode && movie.episodeNo !== episode){
+        movie.episodeNo = episode;
+      }
+    } else{
+      const slots = {
+        movieId: movie.movieId,
+        title: movie.title,
+        releaseDate: movie.releaseDate,
+        directorId: movie.directorId,
+        actors: movie.actors,
+        tvSeriesName: seriesName,
+        episodeNo: episode
+      }
+
+      if(Movie.instances[movieId]){
+        delete Movie.instances[movieId];
+      } else if(Biography.instances[movieId]){
+        delete Biography.instances[movieId];
+      }
+
+      TvSeriesEpisode.instances[movieId] = new TvSeriesEpisode(slots);
+      delete Movie.heap[movieId];
+      Movie.heap[movieId] = TvSeriesEpisode.instances[movieId];
+
     }
   } catch (e) {
     console.log( `${e.constructor.name}: ${e.message}`);
@@ -137,6 +181,8 @@ TvSeriesEpisode.destroy = function (movieId) {
   if (TvSeriesEpisode.instances[movieId]) {
     console.log( `${TvSeriesEpisode.instances[movieId].toString()} deleted!`);
     delete TvSeriesEpisode.instances[movieId];
+    delete Movie.heap[movieId];
+    //delete Movie.instances[movieId];
   } else {
     console.log( `There is no movie with MovieID ${movieId} in the database!`);
   }
@@ -146,7 +192,6 @@ TvSeriesEpisode.destroy = function (movieId) {
  *  Precondition: people must be loaded first
  */
 TvSeriesEpisode.retrieveAll = function () {
-  console.log("Retrieve Series");
   var movies = {};
   try {
     if (!localStorage["tvSeriesEpisode"]) localStorage["tvSeriesEpisode"] = "{}";
@@ -160,9 +205,9 @@ TvSeriesEpisode.retrieveAll = function () {
   for (let movieId of Object.keys( movies)) {
 
     try {
-      console.log("retrieve");
-      console.log(movies[movieId]);
       TvSeriesEpisode.instances[movieId] = new TvSeriesEpisode( movies[movieId]);
+      Movie.heap[movieId] = TvSeriesEpisode.instances[movieId];
+      //Movie.instances[movieId] = new TvSeriesEpisode( movies[movieId]);
     } catch (e) {
       console.log( `${e.constructor.name} while deserializing movie ${movieId}: ${e.message}`);
     }
@@ -173,7 +218,6 @@ TvSeriesEpisode.retrieveAll = function () {
  *  Save all movie objects
  */
 TvSeriesEpisode.saveAll = function () {
-  console.log("series save");
   const nmrOfMovies = Object.keys( TvSeriesEpisode.instances).length;
   try {
     localStorage["tvSeriesEpisode"] = JSON.stringify( TvSeriesEpisode.instances);

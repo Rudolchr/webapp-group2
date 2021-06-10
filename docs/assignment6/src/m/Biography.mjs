@@ -12,10 +12,7 @@ import {isIntegerOrIntegerString, cloneObject} from "../../lib/util.mjs";
 class Biography extends Movie{
   constructor ({movieId, title, releaseDate, actors,directorId, actorsIdRefs, about}){
     super({movieId, title, releaseDate, actors, directorId,actorsIdRefs});
-    console.log("hier");
     this.about = about;
-    console.log("da")
-    console.log("constructor about: " + about);
   }
 
   get about(){
@@ -24,29 +21,20 @@ class Biography extends Movie{
 
   set about(a){
     const validationResult = Biography.checkAbout(a);
-    console.log(a);
-    console.log(typeof(a));
-    console.log(Person.instances[String(a)]);
     if(validationResult instanceof NoConstraintViolation){
-      console.log("hier");
       if(typeof(a) === "number"){
         this._about = Person.instances[String(a)];
       } else if(typeof(a) === "string"){
         this._about = Person.instances[a];
       } else{
-        console.log("hier");
         this._about = Person.instances[String(a.personId)];
       }
-      console.log("set about:");
-      console.log(this._about);
     } else {
-      console.log("throw");
       throw validationResult;
     }
   }
 
   static checkAbout(a){
-    console.log(typeof(a));
     if(!a){
       // is given
       return new MandatoryValueConstraintViolation("A Person this Biography is about must be provided!");
@@ -82,6 +70,7 @@ class Biography extends Movie{
 }
 
 Biography.instances = {};
+Movie.subtypes.push(Biography);
 
 function mergeMovies(list){
   let ret = {};
@@ -107,6 +96,7 @@ Biography.add = function (slots) {
   }
   if (movie) {
     Biography.instances[movie.movieId] = movie;
+    Movie.heap[movie.movieId] = movie;
     console.log( `${movie.toString()} created!`);
   }
 };
@@ -117,13 +107,11 @@ Biography.add = function (slots) {
  */
 Biography.update = function ({movieId, title, releaseDate,
     actorIdRefsToAdd, actorIdRefsToRemove, directorId, about}){
-  const movie = mergeMovies({Biography, Movie, TvSeriesEpisode})[movieId],//Biography.instances[movieId],
+  const movie = Movie.heap[movieId],//mergeMovies({Biography, Movie, TvSeriesEpisode})[movieId],//Biography.instances[movieId],
       objectBeforeUpdate = cloneObject( movie);  // save the current state of movie
   var noConstraintViolated = true, updatedProperties = [];
   try {
     let aboutId = about;
-    console.log("about:");
-    console.log(aboutId);
     if (title && movie.title !== title) {
       movie.title = title;
       updatedProperties.push("title");
@@ -139,8 +127,6 @@ Biography.update = function ({movieId, title, releaseDate,
       }
     }
     if (actorIdRefsToRemove) {
-      console.log("remove");
-      console.log(actorIdRefsToRemove);
       updatedProperties.push("actors(removed)");
       for (let actor_id of actorIdRefsToRemove) {
         movie.removeActor( actor_id);
@@ -160,27 +146,22 @@ Biography.update = function ({movieId, title, releaseDate,
         actors: movie.actors,
         about: aboutId
       }
-      console.log("slots:");
-      console.log(slots);
-      Biography.instances[movieId] = new Biography(slots);
-      console.log("done");
+
       if(Movie.instances[movieId]){
-        console.log("mov");
         delete Movie.instances[movieId];
       } else if(TvSeriesEpisode.instances[movieId]){
-        console.log("tv");
         delete TvSeriesEpisode.instances[movieId];
       }
 
-      console.log(Biography.instances[movieId]);
+      Biography.instances[movieId] = new Biography(slots);
+      delete Movie.heap[movieId];
+      Movie.heap[movieId] = Biography.instances[movieId];
     } else {
         if(aboutId && movie.about !== aboutId){
           movie.about = aboutId;
         }
     }
   } catch (e) {
-    console.log("miau");
-    console.log(e);
     console.log( `${e.constructor.name}: ${e.message}`);
     noConstraintViolated = false;
     // restore object to its state before updating
@@ -202,6 +183,8 @@ Biography.destroy = function (movieId) {
   if (Biography.instances[movieId]) {
     console.log( `${Biography.instances[movieId].toString()} deleted!`);
     delete Biography.instances[movieId];
+    delete Movie.heap[movieId];
+    //delete Movie.instances[movieId];
   } else {
     console.log( `There is no movie with MovieID ${movieId} in the database!`);
   }
@@ -224,9 +207,8 @@ Biography.retrieveAll = function () {
   for (let movieId of Object.keys( movies)) {
 
     try {
-      console.log("retrieve");
-      console.log(movies[movieId]);
       Biography.instances[movieId] = new Biography( movies[movieId]);
+      Movie.heap[movieId] = Biography.instances[movieId];
     } catch (e) {
       console.log( `${e.constructor.name} while deserializing movie ${movieId}: ${e.message}`);
     }
@@ -240,7 +222,6 @@ Biography.retrieveAll = function () {
 
 Biography.saveAll = function () {
   const nmrOfMovies = Object.keys( Biography.instances).length;
-  console.log(Biography.instances);
   try {
     localStorage["biography"] = JSON.stringify( Biography.instances);
     console.log( `${nmrOfMovies} Biography records saved.`);
